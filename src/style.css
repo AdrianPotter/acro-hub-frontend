@@ -1,0 +1,86 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Colour palette */
+  --color-white: #ffffff;
+  --color-darkest: #00171f;
+  --color-dark-blue: #003459;
+  --color-mid-blue: #007ea7;
+  --color-light-blue: #00a8e8;
+
+  color: var(--color-darkest);
+  background-color: var(--color-white);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-white);
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: var(--color-mid-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  color: var(--color-light-blue);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6em 1.4em;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: inherit;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--color-light-blue);
+  outline-offset: 2px;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  padding: 0.6em 0.9em;
+  border: 1.5px solid var(--color-mid-blue);
+  border-radius: 6px;
+  font-size: 1em;
+  font-family: inherit;
+  color: var(--color-darkest);
+  background-color: var(--color-white);
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--color-light-blue);
+}
+
