@@ -3,12 +3,8 @@
     <!-- Hero Section -->
     <section class="hero">
       <div class="hero-content">
-        <div class="hero-logo" aria-hidden="true">
-          <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="60" cy="60" r="60" fill="#007EA7"/>
-            <circle cx="60" cy="60" r="48" fill="#003459"/>
-            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-size="52" font-weight="bold" font-family="system-ui,sans-serif">A</text>
-          </svg>
+        <div class="hero-logo">
+          <img src="@/assets/main_logo.png" alt="Acro Hub logo" />
         </div>
         <h1 class="hero-title">Acro Hub</h1>
         <p class="hero-subtitle">
@@ -83,7 +79,7 @@
   height: 120px;
 }
 
-.hero-logo svg {
+.hero-logo img {
   width: 100%;
   height: 100%;
 }
