@@ -18,30 +18,6 @@
       </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features">
-      <div class="features-inner">
-        <h2>Why Acro Hub?</h2>
-        <div class="feature-cards">
-          <div class="feature-card">
-            <div class="feature-icon">🤸</div>
-            <h3>Comprehensive Library</h3>
-            <p>Browse hundreds of partner acrobatics moves, from beginner-friendly bases to advanced skills.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🔍</div>
-            <h3>Easy Search</h3>
-            <p>Quickly find moves by name with our powerful real-time search functionality.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🌐</div>
-            <h3>Community Driven</h3>
-            <p>Built by acrobats for acrobats — a growing resource for the partner acrobatics community.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- CTA Section -->
     <section class="cta">
       <div class="cta-inner">

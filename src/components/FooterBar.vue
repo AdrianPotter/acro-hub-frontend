@@ -2,13 +2,9 @@
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-brand">
-        <svg class="brand-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="20" cy="20" r="20" fill="#007EA7"/>
-          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="bold" font-family="system-ui,sans-serif">A</text>
-        </svg>
+        <img class="brand-icon" src="/src/assets/main_logo.png" alt="Acro Hub Logo" />
         <span class="brand-name">Acro Hub</span>
       </div>
-      <p class="footer-tagline">Your partner acrobatics move database</p>
       <nav class="footer-links" aria-label="Footer navigation">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
@@ -54,6 +50,7 @@ const { isAuthenticated } = useAuth()
 .brand-icon {
   width: 32px;
   height: 32px;
+  object-fit: contain;
 }
 
 .brand-name {
