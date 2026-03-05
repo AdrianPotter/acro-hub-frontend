@@ -4,7 +4,7 @@ import AboutView from '../views/AboutView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import MovesView from '../views/MovesView.vue'
-import { useAuth } from '../composables/useAuth'
+import { useAuth } from '../composables/useAuth.js'
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },
@@ -23,13 +23,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const { isAuthenticated } = useAuth()
-
-  if (to.meta.requiresAuth && !isAuthenticated.value) {
+  const { isLoggedIn } = useAuth()
+  if (to.meta.requiresAuth && !isLoggedIn.value) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
-
-  return true
 })
 
 export default router

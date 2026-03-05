@@ -1,11 +1,30 @@
 <script setup>
 import { ref } from 'vue'
-import { useAuth } from '../composables/useAuth'
+import { useRouter } from 'vue-router'
+import { auth } from '../services/api.js'
+import { useAuth } from '../composables/useAuth.js'
+
+const router = useRouter()
+const { isLoggedIn, accessToken, clearAuth } = useAuth()
 
 const menuOpen = ref(false)
-const { isAuthenticated } = useAuth()
 const toggleMenu = () => { menuOpen.value = !menuOpen.value }
 const closeMenu = () => { menuOpen.value = false }
+
+async function handleLogout() {
+  const token = accessToken.value
+  clearAuth()
+  closeMenu()
+  router.push('/login')
+  // Best-effort server-side revocation; errors are silently ignored
+  if (token) {
+    try {
+      await auth.logout(token)
+    } catch {
+      // token already expired or network failure — local session already cleared
+    }
+  }
+}
 </script>
 
 <template>
@@ -25,9 +44,14 @@ const closeMenu = () => { menuOpen.value = false }
       <nav :class="['nav-links', { open: menuOpen }]" role="navigation">
         <RouterLink to="/" @click="closeMenu">Home</RouterLink>
         <RouterLink to="/about" @click="closeMenu">About</RouterLink>
-        <RouterLink v-if="isAuthenticated" to="/moves" @click="closeMenu">Moves</RouterLink>
-        <RouterLink v-if="!isAuthenticated" to="/login" class="btn-outline" @click="closeMenu">Login</RouterLink>
-        <RouterLink v-if="!isAuthenticated" to="/register" class="btn-filled" @click="closeMenu">Register</RouterLink>
+        <RouterLink v-if="isLoggedIn" to="/moves" @click="closeMenu">Moves</RouterLink>
+        <template v-if="isLoggedIn">
+          <button class="btn-outline btn-logout" @click="handleLogout">Logout</button>
+        </template>
+        <template v-else>
+          <RouterLink to="/login" class="btn-outline" @click="closeMenu">Login</RouterLink>
+          <RouterLink to="/register" class="btn-filled" @click="closeMenu">Register</RouterLink>
+        </template>
       </nav>
     </div>
   </header>
@@ -98,6 +122,23 @@ const closeMenu = () => { menuOpen.value = false }
 }
 
 .nav-links .btn-outline:hover {
+  background-color: var(--color-light-blue);
+  color: var(--color-darkest);
+}
+
+.nav-links .btn-logout {
+  border: 2px solid var(--color-light-blue);
+  border-radius: 6px;
+  padding: 0.35em 1em;
+  color: var(--color-light-blue);
+  background: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-links .btn-logout:hover {
   background-color: var(--color-light-blue);
   color: var(--color-darkest);
 }
