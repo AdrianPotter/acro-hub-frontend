@@ -67,56 +67,125 @@ npm run preview
 
 ---
 
-## Deploying to AWS S3
+## Deploying to AWS with Terraform
 
-The app uses [hash-based routing](https://router.vuejs.org/guide/essentials/history-mode.html#hash-mode)
-(`createWebHashHistory`), so all navigation is handled client-side via the URL hash fragment
-(e.g. `/#/login`). This means no special server-side redirect rules are required — the S3 bucket
-only needs to serve `index.html`.
+This project includes Terraform configuration to deploy the frontend to AWS with:
+- **S3** for static file hosting (private bucket)
+- **CloudFront** CDN with HTTPS
+- **ACM** SSL/TLS certificates (optional, for custom domains)
+- **Route53** DNS management (optional, for custom domains)
 
-### Steps
+### Prerequisites
 
-1. **Build the app:**
+- [AWS CLI](https://aws.amazon.com/cli/) configured with credentials
+- [Terraform](https://www.terraform.io/downloads) v1.0 or later
+- An AWS account with appropriate permissions
 
-   ```bash
-   npm run build
+### Quick Start
+
+#### 1. Configure Terraform Variables
+
+```bash
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Edit `terraform.tfvars` and set your bucket name (must be globally unique):
+
+```hcl
+bucket_name = "acro-hub-frontend-your-unique-name"
+```
+
+#### 2. Initialize and Apply Terraform
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Type `yes` when prompted. This creates:
+- S3 bucket (private)
+- CloudFront distribution with HTTPS
+- Origin Access Control for secure S3 access
+- Proper bucket policies
+
+#### 3. Deploy Your Application
+
+Use the deployment script:
+
+**PowerShell (Windows):**
+```powershell
+.\deploy.ps1
+```
+
+**Bash (Linux/Mac):**
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+Or manually:
+
+```bash
+# Build the app
+npm run build
+
+# Upload to S3
+aws s3 sync dist/ s3://$(cd terraform && terraform output -raw s3_bucket_name)/ --delete
+
+# Invalidate CloudFront cache
+aws cloudfront create-invalidation \
+  --distribution-id $(cd terraform && terraform output -raw cloudfront_distribution_id) \
+  --paths "/*"
+```
+
+#### 4. Access Your Website
+
+Get your website URL:
+
+```bash
+cd terraform
+terraform output website_url
+```
+
+Your site will be available via HTTPS at the CloudFront distribution URL.
+
+### Using a Custom Domain
+
+To use your own domain (e.g., `acrohub.example.com`):
+
+1. Ensure you have a Route53 hosted zone for your domain
+2. Update `terraform/terraform.tfvars`:
+   ```hcl
+   domain_name = "acrohub.example.com"
+   route53_zone_id = "Z1234567890ABC"  # Your Route53 zone ID
    ```
+3. Run `terraform apply`
 
-2. **Create an S3 bucket** with static website hosting enabled.
-   - In the AWS Console, go to **S3 → Create bucket**.
-   - Uncheck *Block all public access* (required for a public website).
-   - Enable **Static website hosting** under bucket properties.
-   - Set **Index document** to `index.html`.
-   - Set **Error document** to `index.html` (so deep links resolve correctly).
+Terraform will automatically:
+- Create and validate an ACM certificate
+- Configure CloudFront to use your domain
+- Create DNS records in Route53
 
-3. **Upload the `dist/` folder contents** to the bucket root:
+**Note:** Certificate validation can take 5-30 minutes.
 
-   ```bash
-   aws s3 sync dist/ s3://<your-bucket-name>/ --delete
-   ```
+### Additional Configuration
 
-4. **Set a bucket policy** to allow public read access:
+See [`terraform/README.md`](terraform/README.md) for:
+- Detailed deployment instructions
+- Configuration options
+- Custom domain setup
+- Troubleshooting tips
+- Cost estimates
 
-   ```json
-   {
-     "Version": "2012-10-17",
-     "Statement": [
-       {
-         "Sid": "PublicReadGetObject",
-         "Effect": "Allow",
-         "Principal": "*",
-         "Action": "s3:GetObject",
-         "Resource": "arn:aws:s3:::<your-bucket-name>/*"
-       }
-     ]
-   }
-   ```
+### Security Features
 
-5. Your site will be accessible at the **S3 static website endpoint**:
-   `http://<your-bucket-name>.s3-website-<region>.amazonaws.com`
-
-> **Optional:** Front the S3 bucket with **Amazon CloudFront** for HTTPS, custom domain support,
-> and improved performance.
+- ✅ S3 bucket is private (not publicly accessible)
+- ✅ CloudFront uses Origin Access Control (OAC)
+- ✅ All traffic is HTTPS only (HTTP redirects to HTTPS)
+- ✅ TLS 1.2 minimum protocol version
+- ✅ Bucket versioning enabled
 
 ---
 
@@ -141,6 +210,14 @@ acro-hub-frontend/
 │   ├── App.vue          # Root component
 │   ├── main.js          # App entry point
 │   └── style.css        # Global styles & CSS variables
+├── terraform/           # AWS infrastructure as code
+│   ├── main.tf          # Main Terraform configuration
+│   ├── variables.tf     # Input variables
+│   ├── outputs.tf       # Output values
+│   ├── terraform.tfvars.example  # Example configuration
+│   └── README.md        # Detailed deployment guide
+├── deploy.sh            # Deployment script (Bash)
+├── deploy.ps1           # Deployment script (PowerShell)
 ├── index.html           # HTML entry point
 ├── vite.config.js       # Vite configuration
 ├── prompt.md            # Original project prompt

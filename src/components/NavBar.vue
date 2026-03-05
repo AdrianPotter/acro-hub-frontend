@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from 'vue'
+import { useAuth } from '../composables/useAuth'
 
 const menuOpen = ref(false)
+const { isAuthenticated } = useAuth()
 const toggleMenu = () => { menuOpen.value = !menuOpen.value }
 const closeMenu = () => { menuOpen.value = false }
 </script>
@@ -10,10 +12,7 @@ const closeMenu = () => { menuOpen.value = false }
   <header class="navbar">
     <div class="navbar-inner">
       <RouterLink to="/" class="navbar-brand" @click="closeMenu">
-        <svg class="brand-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="20" cy="20" r="20" fill="#007EA7"/>
-          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="bold" font-family="system-ui,sans-serif">A</text>
-        </svg>
+        <img class="brand-icon" src="/src/assets/main_logo.png" alt="Acro Hub Logo" />
         <span>Acro Hub</span>
       </RouterLink>
 
@@ -26,9 +25,9 @@ const closeMenu = () => { menuOpen.value = false }
       <nav :class="['nav-links', { open: menuOpen }]" role="navigation">
         <RouterLink to="/" @click="closeMenu">Home</RouterLink>
         <RouterLink to="/about" @click="closeMenu">About</RouterLink>
-        <RouterLink to="/moves" @click="closeMenu">Moves</RouterLink>
-        <RouterLink to="/login" class="btn-outline" @click="closeMenu">Login</RouterLink>
-        <RouterLink to="/register" class="btn-filled" @click="closeMenu">Register</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/moves" @click="closeMenu">Moves</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/login" class="btn-outline" @click="closeMenu">Login</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/register" class="btn-filled" @click="closeMenu">Register</RouterLink>
       </nav>
     </div>
   </header>
@@ -68,6 +67,8 @@ const closeMenu = () => { menuOpen.value = false }
   width: 36px;
   height: 36px;
   flex-shrink: 0;
+  object-fit: contain;
+  background: transparent;
 }
 
 .nav-links {

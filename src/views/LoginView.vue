@@ -2,10 +2,7 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo" aria-hidden="true">
-        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="30" cy="30" r="30" fill="#007EA7"/>
-          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-size="26" font-weight="bold" font-family="system-ui,sans-serif">A</text>
-        </svg>
+        <img src="../assets/main_logo.png" alt="Acro Hub Logo" />
       </div>
       <h1>Welcome Back</h1>
       <p class="auth-subtitle">Login to your Acro Hub account</p>
@@ -57,6 +54,12 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
+
+const router = useRouter()
+const route = useRoute()
+const { setAuthenticated } = useAuth()
 
 const email = ref('')
 const password = ref('')
@@ -89,7 +92,10 @@ async function handleLogin() {
   // Simulate API call
   await new Promise(r => setTimeout(r, 800))
   loading.value = false
-  formError.value = 'Login functionality coming soon.'
+  setAuthenticated(true)
+
+  const redirectPath = typeof route.query.redirect === 'string' ? route.query.redirect : '/moves'
+  await router.push(redirectPath)
 }
 </script>
 
@@ -116,13 +122,14 @@ async function handleLogin() {
 
 .auth-logo {
   margin: 0 auto 1rem;
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
 }
 
-.auth-logo svg {
+.auth-logo img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 
 h1 {
