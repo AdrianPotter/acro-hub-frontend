@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from 'vue'
+import { useAuth } from '../composables/useAuth'
 
 const menuOpen = ref(false)
+const { isAuthenticated } = useAuth()
 const toggleMenu = () => { menuOpen.value = !menuOpen.value }
 const closeMenu = () => { menuOpen.value = false }
 </script>
@@ -23,9 +25,9 @@ const closeMenu = () => { menuOpen.value = false }
       <nav :class="['nav-links', { open: menuOpen }]" role="navigation">
         <RouterLink to="/" @click="closeMenu">Home</RouterLink>
         <RouterLink to="/about" @click="closeMenu">About</RouterLink>
-        <RouterLink to="/moves" @click="closeMenu">Moves</RouterLink>
-        <RouterLink to="/login" class="btn-outline" @click="closeMenu">Login</RouterLink>
-        <RouterLink to="/register" class="btn-filled" @click="closeMenu">Register</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/moves" @click="closeMenu">Moves</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/login" class="btn-outline" @click="closeMenu">Login</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/register" class="btn-filled" @click="closeMenu">Register</RouterLink>
       </nav>
     </div>
   </header>

@@ -12,9 +12,9 @@
       <nav class="footer-links" aria-label="Footer navigation">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
-        <RouterLink to="/moves">Moves</RouterLink>
-        <RouterLink to="/login">Login</RouterLink>
-        <RouterLink to="/register">Register</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/moves">Moves</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/login">Login</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/register">Register</RouterLink>
       </nav>
       <p class="footer-copy">&copy; {{ year }} Acro Hub. All rights reserved.</p>
     </div>
@@ -22,7 +22,10 @@
 </template>
 
 <script setup>
+import { useAuth } from '../composables/useAuth'
+
 const year = new Date().getFullYear()
+const { isAuthenticated } = useAuth()
 </script>
 
 <style scoped>

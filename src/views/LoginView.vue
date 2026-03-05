@@ -54,6 +54,12 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
+
+const router = useRouter()
+const route = useRoute()
+const { setAuthenticated } = useAuth()
 
 const email = ref('')
 const password = ref('')
@@ -86,7 +92,10 @@ async function handleLogin() {
   // Simulate API call
   await new Promise(r => setTimeout(r, 800))
   loading.value = false
-  formError.value = 'Login functionality coming soon.'
+  setAuthenticated(true)
+
+  const redirectPath = typeof route.query.redirect === 'string' ? route.query.redirect : '/moves'
+  await router.push(redirectPath)
 }
 </script>
 
