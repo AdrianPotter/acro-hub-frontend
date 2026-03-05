@@ -1,0 +1,10 @@
+# Terraform backend state files (local state for backend setup)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Variable files
+terraform.tfvars
+*.auto.tfvars
+

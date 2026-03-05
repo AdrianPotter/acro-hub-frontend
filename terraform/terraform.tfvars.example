@@ -1,0 +1,25 @@
+# Example terraform.tfvars file
+# Copy this file to terraform.tfvars and update with your values
+
+# Required: Must be globally unique across all AWS S3 buckets
+bucket_name = "acro-hub-frontend-your-unique-name"
+
+# Optional: AWS region for the S3 bucket
+# aws_region = "us-east-1"
+
+# Optional: Environment tag
+# environment = "production"
+
+# Optional: CloudFront price class
+# PriceClass_100 = USA, Canada, Europe (cheapest)
+# PriceClass_200 = PriceClass_100 + Asia, Africa, Oceania, Middle East
+# PriceClass_All = All edge locations
+# cloudfront_price_class = "PriceClass_100"
+
+# Optional: Custom domain configuration
+# If you want to use a custom domain (e.g., acrohub.example.com):
+# 1. Ensure you have a Route53 hosted zone for your domain
+# 2. Set these variables:
+# domain_name = "acrohub.example.com"
+# route53_zone_id = "Z1234567890ABC"
+
