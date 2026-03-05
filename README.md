@@ -8,6 +8,42 @@ A Vue.js single-page application that serves as a partner acrobatics move databa
 - [Vite](https://vitejs.dev/) for fast development and optimised production builds
 - [Vue Router 4](https://router.vuejs.org/) with hash-based history (required for S3 SPA hosting)
 
+## Backend Integration
+
+This SPA connects to the [Acro Hub Backend](https://github.com/AdrianPotter/acro-hub-backend) REST API. The following endpoints are consumed:
+
+| Method | Path | Auth required | Description |
+|--------|------|---------------|-------------|
+| `POST` | `/auth/login` | No | Authenticate; returns `{ accessToken, idToken, refreshToken, … }` |
+| `POST` | `/auth/logout` | accessToken | Globally revoke all Cognito tokens |
+| `POST` | `/auth/register` | No | Create a new account; returns `{ message, userSub, confirmed }` |
+| `GET` | `/moves` | idToken (Bearer) | Return all moves as `{ moves: Move[], count: N }` |
+
+The `idToken` (Cognito ID token) is stored in `localStorage` and sent as `Authorization: Bearer <idToken>` on all authenticated requests. The `accessToken` is stored separately and used only for the `/auth/logout` call.
+
+### Move fields
+
+The `Move` objects returned by `GET /moves` contain:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `moveId` | string (UUID) | Unique identifier |
+| `name` | string | Move name |
+| `description` | string | Description |
+| `difficulty` | `easy` \| `medium` \| `hard` \| `expert` | Skill level |
+| `category` | `acrobalance` \| `hand-to-hand` \| `icarian` \| `washing-machine` | Style category |
+| `tags` | string[] | Free-form tags |
+
+### Configuration
+
+Copy `.env.example` to `.env.local` and set the backend URL:
+
+```bash
+cp .env.example .env.local
+# then edit .env.local:
+VITE_API_BASE_URL=https://api.acrohub.dance
+```
+
 ## Pages
 
 | Route | Description |

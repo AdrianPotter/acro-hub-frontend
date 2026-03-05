@@ -27,144 +27,58 @@
 
     <section class="moves-body">
       <div class="moves-inner">
-        <p v-if="filteredMoves.length === 0" class="no-results">
-          No moves found matching "<strong>{{ searchQuery }}</strong>".
-        </p>
-        <ul v-else class="moves-grid" role="list">
-          <li v-for="move in filteredMoves" :key="move.id" class="move-card">
-            <div class="move-level" :class="move.level.toLowerCase()">{{ move.level }}</div>
-            <h2 class="move-name">{{ move.name }}</h2>
-            <p class="move-desc">{{ move.description }}</p>
-            <div class="move-tags">
-              <span v-for="tag in move.tags" :key="tag" class="tag">{{ tag }}</span>
-            </div>
-          </li>
-        </ul>
-        <p class="results-count" v-if="filteredMoves.length > 0">
-          Showing {{ filteredMoves.length }} of {{ moves.length }} moves
-        </p>
+        <p v-if="loading" class="loading-text" aria-live="polite">Loading moves…</p>
+        <div v-else-if="fetchError" class="fetch-error" role="alert">{{ fetchError }}</div>
+        <template v-else>
+          <p v-if="filteredMoves.length === 0" class="no-results">
+            No moves found matching "<strong>{{ searchQuery }}</strong>".
+          </p>
+          <ul v-else class="moves-grid" role="list">
+            <li v-for="move in filteredMoves" :key="move.moveId" class="move-card">
+              <div class="move-badges">
+                <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
+                <div v-if="move.category" class="move-badge category">{{ move.category }}</div>
+              </div>
+              <h2 class="move-name">{{ move.name }}</h2>
+              <p class="move-desc">{{ move.description }}</p>
+              <div class="move-tags">
+                <span v-for="tag in move.tags" :key="tag" class="tag">{{ tag }}</span>
+              </div>
+            </li>
+          </ul>
+          <p class="results-count" v-if="filteredMoves.length > 0">
+            Showing {{ filteredMoves.length }} of {{ moves.length }} moves
+          </p>
+        </template>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { movesApi } from '../services/api.js'
 
 const searchQuery = ref('')
+const moves = ref([])
+const loading = ref(true)
+const fetchError = ref('')
 
-const moves = [
-  {
-    id: 1,
-    name: 'Bird',
-    level: 'Beginner',
-    description: 'Base lies on back with feet in the air supporting the flyer\'s hips. The flyer extends arms out like wings.',
-    tags: ['balance', 'static', 'lying'],
-  },
-  {
-    id: 2,
-    name: 'Star',
-    level: 'Beginner',
-    description: 'Flyer balances horizontally on the base\'s feet in a starfish-like pose with arms and legs outstretched.',
-    tags: ['balance', 'static', 'lying'],
-  },
-  {
-    id: 3,
-    name: 'Throne',
-    level: 'Beginner',
-    description: 'The flyer sits on the base\'s hands which are positioned at shoulder height, creating a seat-like support.',
-    tags: ['balance', 'standing', 'shoulder'],
-  },
-  {
-    id: 4,
-    name: 'Plank',
-    level: 'Beginner',
-    description: 'Flyer holds a straight plank position while base supports with hands under shoulders and feet.',
-    tags: ['balance', 'static'],
-  },
-  {
-    id: 5,
-    name: 'Shoulder Stand',
-    level: 'Intermediate',
-    description: 'Flyer stands on the base\'s shoulders with hands for initial support, progressing to unsupported.',
-    tags: ['standing', 'vertical', 'shoulder'],
-  },
-  {
-    id: 6,
-    name: 'Hand to Hand',
-    level: 'Advanced',
-    description: 'Flyer performs a handstand balanced on the base\'s upstretched hands. Requires strong overhead pressing.',
-    tags: ['handstand', 'vertical', 'advanced'],
-  },
-  {
-    id: 7,
-    name: 'Washing Machine',
-    level: 'Intermediate',
-    description: 'A dynamic transition where the flyer rotates from one position to another while the base maintains support.',
-    tags: ['dynamic', 'transition', 'rotation'],
-  },
-  {
-    id: 8,
-    name: 'Foot to Hand',
-    level: 'Intermediate',
-    description: 'The base lifts the flyer using only their feet into the flyer\'s hands, creating a vertical balance point.',
-    tags: ['balance', 'vertical', 'foot'],
-  },
-  {
-    id: 9,
-    name: 'Reverse Bird',
-    level: 'Beginner',
-    description: 'A variation of Bird where the flyer faces the opposite direction, resting chest on base\'s feet.',
-    tags: ['balance', 'static', 'lying'],
-  },
-  {
-    id: 10,
-    name: 'Straddle Bat',
-    level: 'Intermediate',
-    description: 'Flyer hangs inverted with legs in a straddle position while base supports from below.',
-    tags: ['inversion', 'hang', 'straddle'],
-  },
-  {
-    id: 11,
-    name: 'Folded Leaf',
-    level: 'Beginner',
-    description: 'A restorative inversion where the flyer folds over the base\'s feet, arms hanging freely.',
-    tags: ['inversion', 'passive', 'lying'],
-  },
-  {
-    id: 12,
-    name: 'Temple',
-    level: 'Advanced',
-    description: 'Multi-person pose with multiple flyers balanced at height on a single or pair of bases.',
-    tags: ['group', 'advanced', 'balance'],
-  },
-  {
-    id: 13,
-    name: 'Back Bird',
-    level: 'Beginner',
-    description: 'Like Bird but the flyer bends backwards, creating an elegant arched shape in the air.',
-    tags: ['balance', 'backbend', 'lying'],
-  },
-  {
-    id: 14,
-    name: 'Side Star',
-    level: 'Intermediate',
-    description: 'A lateral variation of Star where the flyer is balanced on one side of the base\'s feet.',
-    tags: ['balance', 'static', 'lying'],
-  },
-  {
-    id: 15,
-    name: 'Flag',
-    level: 'Advanced',
-    description: 'Flyer holds a horizontal body position supported only at a single hand or foot contact point.',
-    tags: ['balance', 'advanced', 'strength'],
-  },
-]
+onMounted(async () => {
+  try {
+    const data = await movesApi.list()
+    moves.value = data.moves || []
+  } catch (err) {
+    fetchError.value = err.message || 'Failed to load moves. Please try again later.'
+  } finally {
+    loading.value = false
+  }
+})
 
 const filteredMoves = computed(() => {
-  if (!searchQuery.value.trim()) return moves
+  if (!searchQuery.value.trim()) return moves.value
   const q = searchQuery.value.toLowerCase().trim()
-  return moves.filter(m => m.name.toLowerCase().includes(q))
+  return moves.value.filter(m => m.name.toLowerCase().includes(q))
 })
 </script>
 
@@ -263,6 +177,25 @@ const filteredMoves = computed(() => {
   margin: 0 auto;
 }
 
+.loading-text {
+  text-align: center;
+  color: #555;
+  font-size: 1.05rem;
+  padding: 3rem 0;
+}
+
+.fetch-error {
+  text-align: center;
+  background-color: #fff0f0;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  color: #721c24;
+  font-size: 0.95rem;
+  margin: 2rem auto;
+  max-width: 560px;
+}
+
 .no-results {
   text-align: center;
   color: #555;
@@ -295,30 +228,47 @@ const filteredMoves = computed(() => {
   border-color: var(--color-mid-blue);
 }
 
-.move-level {
+.move-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.move-badge {
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  text-transform: capitalize;
+  letter-spacing: 0.04em;
   padding: 0.2em 0.7em;
   border-radius: 99px;
-  align-self: flex-start;
 }
 
-.move-level.beginner {
+.move-badge.difficulty.easy {
   background-color: #d4f4e6;
   color: #1a6b3c;
 }
 
-.move-level.intermediate {
+.move-badge.difficulty.medium {
   background-color: #fff2cc;
   color: #7a5800;
 }
 
-.move-level.advanced {
+.move-badge.difficulty.hard {
   background-color: #fde0e0;
   color: #8b1a1a;
+}
+
+.move-badge.difficulty.expert {
+  background-color: #f0d4f4;
+  color: #5a1a6b;
+}
+
+.move-badge.category {
+  background-color: #e8f4fb;
+  color: var(--color-mid-blue);
+  font-weight: 600;
 }
 
 .move-name {

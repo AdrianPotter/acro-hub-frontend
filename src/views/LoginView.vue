@@ -57,6 +57,13 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { auth } from '../services/api.js'
+import { useAuth } from '../composables/useAuth.js'
+
+const router = useRouter()
+const route = useRoute()
+const { setAuth } = useAuth()
 
 const email = ref('')
 const password = ref('')
@@ -86,10 +93,20 @@ async function handleLogin() {
   formError.value = ''
   if (!validate()) return
   loading.value = true
-  // Simulate API call
-  await new Promise(r => setTimeout(r, 800))
-  loading.value = false
-  formError.value = 'Login functionality coming soon.'
+  try {
+    const data = await auth.login(email.value, password.value)
+    setAuth({ idToken: data.idToken, accessToken: data.accessToken, refreshToken: data.refreshToken }, null)
+    const redirect = route.query.redirect || '/moves'
+    router.push(redirect)
+  } catch (err) {
+    formError.value = err.status === 401
+      ? 'Invalid email or password.'
+      : err.status === 403
+        ? 'Account not yet confirmed. Please check your email.'
+        : (err.message || 'Login failed. Please try again.')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 

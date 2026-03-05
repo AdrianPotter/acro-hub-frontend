@@ -88,6 +88,10 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { auth } from '../services/api.js'
+
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -142,10 +146,17 @@ async function handleRegister() {
   successMessage.value = ''
   if (!validate()) return
   loading.value = true
-  // Simulate API call
-  await new Promise(r => setTimeout(r, 800))
-  loading.value = false
-  successMessage.value = 'Registration functionality coming soon.'
+  try {
+    await auth.register(email.value, password.value)
+    successMessage.value = 'Account created! Redirecting to login…'
+    setTimeout(() => router.push('/login'), 1500)
+  } catch (err) {
+    formError.value = err.status === 409
+      ? 'An account with that email already exists.'
+      : (err.message || 'Registration failed. Please try again.')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
