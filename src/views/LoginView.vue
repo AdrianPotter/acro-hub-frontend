@@ -36,7 +36,12 @@
           <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
         </div>
 
-        <div v-if="formError" class="form-alert" role="alert">{{ formError }}</div>
+        <div v-if="formError" class="form-alert" role="alert">
+          {{ formError }}
+          <span v-if="unconfirmedEmail">
+            <RouterLink :to="{ name: 'confirm-registration', query: { email: unconfirmedEmail } }">Confirm your account</RouterLink>.
+          </span>
+        </div>
 
         <button type="submit" class="btn-submit" :disabled="loading">
           <span v-if="loading">Logging in…</span>
@@ -66,6 +71,7 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const formError = ref('')
+const unconfirmedEmail = ref('')
 const errors = reactive({ email: '', password: '' })
 
 function validate() {
@@ -88,6 +94,7 @@ function validate() {
 
 async function handleLogin() {
   formError.value = ''
+  unconfirmedEmail.value = ''
   if (!validate()) return
   loading.value = true
   try {
@@ -96,11 +103,14 @@ async function handleLogin() {
     const redirect = route.query.redirect || '/moves'
     router.push(redirect)
   } catch (err) {
-    formError.value = err.status === 401
-      ? 'Invalid email or password.'
-      : err.status === 403
-        ? 'Account not yet confirmed. Please check your email.'
+    if (err.status === 403) {
+      formError.value = 'Account not yet confirmed. Please check your email or '
+      unconfirmedEmail.value = email.value
+    } else {
+      formError.value = err.status === 401
+        ? 'Invalid email or password.'
         : (err.message || 'Login failed. Please try again.')
+    }
   } finally {
     loading.value = false
   }
