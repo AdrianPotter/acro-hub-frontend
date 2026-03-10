@@ -41,7 +41,7 @@ Copy `.env.example` to `.env.local` and set the backend URL:
 ```bash
 cp .env.example .env.local
 # then edit .env.local:
-VITE_API_BASE_URL=https://api.acrohub.dance
+VITE_API_BASE_URL=https://api.acrohub.org
 ```
 
 ## Pages
