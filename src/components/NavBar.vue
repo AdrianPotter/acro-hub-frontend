@@ -151,6 +151,11 @@ async function handleLogout() {
   font-weight: 700;
 }
 
+.nav-links .btn-filled.router-link-active,
+.nav-links .btn-filled.router-link-exact-active {
+  color: var(--color-white);
+}
+
 .nav-links .btn-filled:hover {
   background-color: var(--color-mid-blue);
   color: var(--color-white);
