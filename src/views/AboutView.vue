@@ -4,8 +4,8 @@
       <div class="about-hero-inner">
         <h1>About Acro Hub</h1>
         <p class="lead">
-          Acro Hub is an open resource for the partner acrobatics community — a searchable database
-          of moves, techniques, and skills designed to help practitioners at every level.
+          Acro Hub is an open resource for the acrobatics community — a searchable database
+          of moves designed to help practitioners at every level.
         </p>
       </div>
     </section>
@@ -15,18 +15,27 @@
         <div class="about-section">
           <h2>What is Partner Acrobatics?</h2>
           <p>
-            Partner acrobatics (also known as acro dance, acroyoga, or hand-to-hand) is a discipline
-            where two or more people work together to create poses, balances, and dynamic movements.
-            It draws from gymnastics, dance, circus arts, and yoga, combining strength, flexibility,
-            trust, and communication.
+            Many disciplines involve acrobatics. Our history is with acrobatic dance, and so the material
+            contained on the hub today leans on that experience, but with influences from other groups that
+            we've worked with over the years. Our hope is that it will continue to evolve over time.
+          </p>
+          <p>
+            For the purposes of this hub, we consider partner acrobatics to be where two (occasionally more)
+            people work together to create either static poses or dynamic movements. It draws from gymnastics, dance,
+            circus arts, and yoga, combining strength, flexibility, trust, and communication.
           </p>
         </div>
 
         <div class="about-section">
           <h2>Our Mission</h2>
           <p>
-            We believe knowledge should be accessible. Acro Hub aims to catalogue and document
-            the wide variety of acrobatic moves that exist within the partner acrobatics world,
+            We've loved learning from a wide community of acrobats over the years and we've forgotten
+            more moves than we can remember. We wanted to create a resource that would make it easier for people to
+            discover and reference the moves we've learned, and to share more of their own.
+          </p>
+          <p>
+            Acro Hub aims to catalogue and document
+            the wide variety of acrobatic moves out there,
             making it easier for teachers, students, and recreational practitioners to discover
             and reference skills.
           </p>
@@ -38,7 +47,7 @@
             <li><strong>Beginners</strong> exploring partner acrobatics for the first time.</li>
             <li><strong>Intermediate practitioners</strong> looking to expand their vocabulary of moves.</li>
             <li><strong>Coaches and teachers</strong> who want a quick reference tool.</li>
-            <li><strong>Advanced performers</strong> seeking inspiration and documentation.</li>
+            <li><strong>Advanced performers</strong> seeking inspiration.</li>
           </ul>
         </div>
 
@@ -47,7 +56,8 @@
           <p>
             Acrobatics can carry risk of injury. Always practise with qualified spotters or coaches,
             warm up thoroughly, and progress at a safe pace. The moves listed in Acro Hub are
-            for reference only — always get in-person guidance before attempting new skills.
+            for reference only — always get in-person guidance before attempting new skills. The creators of Acro Hub
+            are not liable for any injuries that may occur from practising the moves listed on this site.
           </p>
         </div>
 
@@ -84,7 +94,7 @@
 .lead {
   font-size: 1.1rem;
   line-height: 1.7;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
 }
 

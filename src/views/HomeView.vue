@@ -11,9 +11,9 @@
           Your ultimate partner acrobatics move database. Discover, learn, and master acrobatic
           moves with our comprehensive library curated for performers of all levels.
         </p>
-        <div class="hero-actions">
-          <RouterLink to="/register" class="btn btn-primary">Get Started</RouterLink>
-          <RouterLink to="/login" class="btn btn-secondary">Login</RouterLink>
+        <div class="cta-actions">
+          <RouterLink to="/moves" class="btn btn-primary">Browse Moves</RouterLink>
+          <RouterLink to="/about" class="btn btn-outline">Learn More</RouterLink>
         </div>
       </div>
     </section>
@@ -23,10 +23,10 @@
       <div class="cta-inner">
         <h2>Ready to explore?</h2>
         <p>Join Acro Hub today and dive into our move database.</p>
-        <div class="cta-actions">
-          <RouterLink to="/moves" class="btn btn-primary">Browse Moves</RouterLink>
-          <RouterLink to="/about" class="btn btn-outline">Learn More</RouterLink>
-        </div>
+      </div>
+      <div class="hero-actions">
+        <RouterLink to="/register" class="btn btn-primary">Get Started</RouterLink>
+        <RouterLink to="/login" class="btn btn-secondary">Login</RouterLink>
       </div>
     </section>
   </div>
