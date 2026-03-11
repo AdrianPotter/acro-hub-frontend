@@ -45,6 +45,7 @@ async function handleLogout() {
         <RouterLink to="/" @click="closeMenu">Home</RouterLink>
         <RouterLink to="/about" @click="closeMenu">About</RouterLink>
         <RouterLink v-if="isLoggedIn" to="/moves" @click="closeMenu">Moves</RouterLink>
+        <RouterLink v-if="isLoggedIn" to="/moves/upload" @click="closeMenu">Upload Move</RouterLink>
         <template v-if="isLoggedIn">
           <button class="btn-outline btn-logout" @click="handleLogout">Logout</button>
         </template>

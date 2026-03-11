@@ -6,21 +6,24 @@
         <p class="moves-subtitle">
           Browse our collection of partner acrobatics moves. Use the search box to filter by name.
         </p>
-        <div class="search-wrapper">
-          <label for="search" class="sr-only">Search moves</label>
-          <svg class="search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/>
-            <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-          <input
-            id="search"
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search moves…"
-            autocomplete="off"
-            class="search-input"
-          />
-          <button v-if="searchQuery" class="search-clear" @click="searchQuery = ''" aria-label="Clear search">✕</button>
+        <div class="moves-header-actions">
+          <div class="search-wrapper">
+            <label for="search" class="sr-only">Search moves</label>
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/>
+              <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <input
+              id="search"
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search moves…"
+              autocomplete="off"
+              class="search-input"
+            />
+            <button v-if="searchQuery" class="search-clear" @click="searchQuery = ''" aria-label="Clear search">✕</button>
+          </div>
+          <RouterLink to="/moves/upload" class="btn-upload">+ Upload Move</RouterLink>
         </div>
       </div>
     </section>
@@ -106,10 +109,36 @@ const filteredMoves = computed(() => {
   font-size: 1.05rem;
 }
 
+.moves-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-upload {
+  display: inline-block;
+  background-color: var(--color-light-blue);
+  color: var(--color-darkest);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.6em 1.2em;
+  border-radius: 6px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-upload:hover {
+  background-color: var(--color-white);
+  color: var(--color-dark-blue);
+}
+
 .search-wrapper {
   position: relative;
   max-width: 480px;
-  margin: 0 auto;
+  flex: 1 1 300px;
 }
 
 .search-icon {

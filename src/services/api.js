@@ -59,4 +59,9 @@ export const auth = {
 
 export const movesApi = {
   list: () => request('/moves'),
+  create: (moveData) =>
+    request('/moves', {
+      method: 'POST',
+      body: JSON.stringify(moveData),
+    }),
 }
