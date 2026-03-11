@@ -59,6 +59,7 @@ export const auth = {
 
 export const movesApi = {
   list: () => request('/moves'),
+  get: (moveId) => request(`/moves/${encodeURIComponent(moveId)}`),
   create: (moveData) =>
     request('/moves', {
       method: 'POST',
@@ -72,4 +73,6 @@ export const videosApi = {
     request(`/videos/${encodeURIComponent(moveId)}/upload-url`, {
       method: 'POST',
     }),
+  getViewUrl: (moveId) =>
+    request(`/videos/${encodeURIComponent(moveId)}/view-url`),
 }

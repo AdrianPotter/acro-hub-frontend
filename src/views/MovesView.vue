@@ -37,16 +37,18 @@
             No moves found matching "<strong>{{ searchQuery }}</strong>".
           </p>
           <ul v-else class="moves-grid" role="list">
-            <li v-for="move in filteredMoves" :key="move.moveId" class="move-card">
-              <div class="move-badges">
-                <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
-                <div v-if="move.category" class="move-badge category">{{ move.category }}</div>
-              </div>
-              <h2 class="move-name">{{ move.name }}</h2>
-              <p class="move-desc">{{ move.description }}</p>
-              <div class="move-tags">
-                <span v-for="tag in move.tags" :key="tag" class="tag">{{ tag }}</span>
-              </div>
+            <li v-for="move in filteredMoves" :key="move.moveId">
+              <RouterLink :to="`/moves/${move.moveId}`" class="move-card">
+                <div class="move-badges">
+                  <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
+                  <div v-if="move.category" class="move-badge category">{{ move.category }}</div>
+                </div>
+                <h2 class="move-name">{{ move.name }}</h2>
+                <p class="move-desc">{{ move.description }}</p>
+                <div class="move-tags">
+                  <span v-for="tag in move.tags" :key="tag" class="tag">{{ tag }}</span>
+                </div>
+              </RouterLink>
             </li>
           </ul>
           <p class="results-count" v-if="filteredMoves.length > 0">
@@ -231,6 +233,8 @@ const filteredMoves = computed(() => {
   flex-direction: column;
   gap: 0.6rem;
   transition: box-shadow 0.2s, border-color 0.2s;
+  text-decoration: none;
+  color: inherit;
 }
 
 .move-card:hover {

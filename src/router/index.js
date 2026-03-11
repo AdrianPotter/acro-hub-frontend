@@ -6,6 +6,7 @@ import RegisterView from '../views/RegisterView.vue'
 import ConfirmRegistrationView from '../views/ConfirmRegistrationView.vue'
 import MovesView from '../views/MovesView.vue'
 import UploadMoveView from '../views/UploadMoveView.vue'
+import MoveDetailView from '../views/MoveDetailView.vue'
 import { useAuth } from '../composables/useAuth.js'
 
 const routes = [
@@ -16,6 +17,7 @@ const routes = [
   { path: '/confirm-registration', name: 'confirm-registration', component: ConfirmRegistrationView },
   { path: '/moves', name: 'moves', component: MovesView, meta: { requiresAuth: true } },
   { path: '/moves/upload', name: 'upload-move', component: UploadMoveView, meta: { requiresAuth: true } },
+  { path: '/moves/:moveId', name: 'move-detail', component: MoveDetailView, meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({
