@@ -227,7 +227,7 @@ async function handleLogout() {
 .nav-dropdown-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 0.75rem);
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   background-color: var(--color-dark-blue);
@@ -235,7 +235,7 @@ async function handleLogout() {
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   min-width: 140px;
-  padding: 0.4rem 0;
+  padding: 0.75rem 0 0.4rem;
   z-index: 200;
 }
 
