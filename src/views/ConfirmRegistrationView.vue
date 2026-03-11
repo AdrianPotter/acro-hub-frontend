@@ -4,10 +4,10 @@
       <div class="auth-logo" aria-hidden="true">
         <img src="../assets/main_logo.png" alt="Acro Hub Logo" />
       </div>
-      <h1>Create Account</h1>
-      <p class="auth-subtitle">Join Acro Hub today — it's free</p>
+      <h1>Confirm Your Account</h1>
+      <p class="auth-subtitle">Enter the verification code sent to your email</p>
 
-      <form class="auth-form" @submit.prevent="handleRegister" novalidate>
+      <form class="auth-form" @submit.prevent="handleConfirm" novalidate>
         <div class="form-group">
           <label for="email">Email address</label>
           <input
@@ -23,60 +23,31 @@
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="code">Verification code</label>
           <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="Choose a password"
-            autocomplete="new-password"
+            id="code"
+            v-model="code"
+            type="text"
+            placeholder="Enter your 6-digit code"
+            autocomplete="one-time-code"
+            inputmode="numeric"
             required
-            :class="{ error: errors.password }"
+            :class="{ error: errors.code }"
           />
-          <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
-        </div>
-
-        <div class="form-group">
-          <label for="confirmPassword">Confirm password</label>
-          <input
-            id="confirmPassword"
-            v-model="confirmPassword"
-            type="password"
-            placeholder="Repeat your password"
-            autocomplete="new-password"
-            required
-            :class="{ error: errors.confirmPassword }"
-          />
-          <span v-if="errors.confirmPassword" class="field-error">{{ errors.confirmPassword }}</span>
-        </div>
-
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input
-              id="terms"
-              v-model="agreedToTerms"
-              type="checkbox"
-              :class="{ error: errors.terms }"
-            />
-            <span>
-              I agree to the
-              <RouterLink to="/about">Terms &amp; Conditions</RouterLink>
-            </span>
-          </label>
-          <span v-if="errors.terms" class="field-error">{{ errors.terms }}</span>
+          <span v-if="errors.code" class="field-error">{{ errors.code }}</span>
         </div>
 
         <div v-if="formError" class="form-alert" role="alert">{{ formError }}</div>
         <div v-if="successMessage" class="form-success" role="status">{{ successMessage }}</div>
 
         <button type="submit" class="btn-submit" :disabled="loading">
-          <span v-if="loading">Creating account…</span>
-          <span v-else>Register</span>
+          <span v-if="loading">Confirming…</span>
+          <span v-else>Confirm Account</span>
         </button>
       </form>
 
       <p class="auth-footer-text">
-        Already have an account?
+        Already confirmed?
         <RouterLink to="/login">Login here</RouterLink>
       </p>
     </div>
@@ -85,25 +56,22 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { auth } from '../services/api.js'
 
 const router = useRouter()
+const route = useRoute()
 
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const agreedToTerms = ref(false)
+const email = ref(route.query.email || '')
+const code = ref('')
 const loading = ref(false)
 const formError = ref('')
 const successMessage = ref('')
-const errors = reactive({ email: '', password: '', confirmPassword: '', terms: '' })
+const errors = reactive({ email: '', code: '' })
 
 function validate() {
   errors.email = ''
-  errors.password = ''
-  errors.confirmPassword = ''
-  errors.terms = ''
+  errors.code = ''
   let valid = true
 
   if (!email.value) {
@@ -114,47 +82,31 @@ function validate() {
     valid = false
   }
 
-  if (!password.value) {
-    errors.password = 'Password is required.'
-    valid = false
-  } else if (password.value.length < 8) {
-    errors.password = 'Password must be at least 8 characters.'
-    valid = false
-  }
-
-  if (!confirmPassword.value) {
-    errors.confirmPassword = 'Please confirm your password.'
-    valid = false
-  } else if (password.value !== confirmPassword.value) {
-    errors.confirmPassword = 'Passwords do not match.'
-    valid = false
-  }
-
-  if (!agreedToTerms.value) {
-    errors.terms = 'You must agree to the Terms & Conditions.'
+  if (!code.value) {
+    errors.code = 'Verification code is required.'
     valid = false
   }
 
   return valid
 }
 
-async function handleRegister() {
+async function handleConfirm() {
   formError.value = ''
   successMessage.value = ''
   if (!validate()) return
   loading.value = true
   try {
-    await auth.register(email.value, password.value)
-    successMessage.value = 'Account created! Check your email for a verification code.'
-    setTimeout(() => router.push({ name: 'confirm-registration', query: { email: email.value } }), 1500)
+    await auth.confirmRegistration(email.value, code.value)
+    successMessage.value = 'Account confirmed! Redirecting to login…'
+    setTimeout(() => router.push('/login'), 1500)
   } catch (err) {
-    formError.value = err.status === 409
-      ? 'An account with that email already exists.'
-      : err.status === 400
-        ? 'Invalid registration details. Please check your input.'
-        : err.status === 429
-          ? 'Too many attempts. Please wait a moment and try again.'
-          : (err.message || 'Registration failed. Please try again.')
+    formError.value = err.status === 400
+      ? 'Invalid or expired verification code. Please try again.'
+      : err.status === 404
+        ? 'No account found with that email address.'
+        : err.status === 409
+          ? 'This account has already been confirmed. You can log in now.'
+          : (err.message || 'Confirmation failed. Please try again.')
   } finally {
     loading.value = false
   }
@@ -222,33 +174,6 @@ h1 {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-dark-blue);
-}
-
-.checkbox-group {
-  gap: 0.25rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  font-weight: 400 !important;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  accent-color: var(--color-mid-blue);
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"].error {
-  outline: 2px solid #d9534f;
 }
 
 input.error {
