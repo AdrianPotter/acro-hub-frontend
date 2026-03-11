@@ -33,26 +33,14 @@
             ></textarea>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="difficulty">Difficulty</label>
-              <select id="difficulty" v-model="form.difficulty">
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-                <option value="expert">Expert</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="category">Category</label>
-              <select id="category" v-model="form.category">
-                <option value="acrobalance">Acrobalance</option>
-                <option value="hand-to-hand">Hand-to-hand</option>
-                <option value="icarian">Icarian</option>
-                <option value="washing-machine">Washing machine</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label for="difficulty">Difficulty</label>
+            <select id="difficulty" v-model="form.difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+              <option value="expert">Expert</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -63,6 +51,27 @@
               type="text"
               placeholder="e.g. static, beginner, balance"
             />
+          </div>
+
+          <div class="form-group">
+            <label for="video">Video <span class="required" aria-hidden="true">*</span></label>
+            <input
+              id="video"
+              ref="fileInputRef"
+              type="file"
+              accept="video/*"
+              required
+              :class="{ error: errors.video }"
+              @change="handleFileChange"
+            />
+            <span v-if="errors.video" class="field-error">{{ errors.video }}</span>
+          </div>
+
+          <div v-if="uploadProgress !== null" class="progress-wrapper" role="status" aria-live="polite">
+            <div class="progress-label">{{ uploadProgressLabel }}</div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" :style="{ width: uploadProgress + '%' }"></div>
+            </div>
           </div>
 
           <div v-if="formError" class="form-alert" role="alert">{{ formError }}</div>
@@ -87,32 +96,47 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { movesApi } from '../services/api.js'
+import { movesApi, videosApi } from '../services/api.js'
 
 const form = reactive({
   name: '',
   description: '',
   difficulty: 'easy',
-  category: 'acrobalance',
 })
 const tagsInput = ref('')
+const selectedFile = ref(null)
+const fileInputRef = ref(null)
 const loading = ref(false)
 const formError = ref('')
 const successMessage = ref('')
-const errors = reactive({ name: '' })
+const uploadProgress = ref(null)
+const uploadProgressLabel = ref('')
+const errors = reactive({ name: '', video: '' })
+
+function handleFileChange(event) {
+  selectedFile.value = event.target.files[0] || null
+  errors.video = ''
+}
 
 function validate() {
   errors.name = ''
+  errors.video = ''
+  let valid = true
   if (!form.name.trim()) {
     errors.name = 'Move name is required.'
-    return false
+    valid = false
   }
-  return true
+  if (!selectedFile.value) {
+    errors.video = 'Please select a video file.'
+    valid = false
+  }
+  return valid
 }
 
 async function handleSubmit() {
   formError.value = ''
   successMessage.value = ''
+  uploadProgress.value = null
   if (!validate()) return
 
   const tags = tagsInput.value
@@ -123,22 +147,47 @@ async function handleSubmit() {
   const payload = {
     name: form.name.trim(),
     difficulty: form.difficulty,
-    category: form.category,
   }
   if (form.description.trim()) payload.description = form.description.trim()
   if (tags.length > 0) payload.tags = tags
 
   loading.value = true
   try {
-    await movesApi.create(payload)
+    // Step 1: create the move and get the moveId
+    uploadProgress.value = 0
+    uploadProgressLabel.value = 'Creating move…'
+    const move = await movesApi.create(payload)
+    const moveId = move.moveId
+
+    // Step 2: request a pre-signed upload URL
+    uploadProgress.value = 30
+    uploadProgressLabel.value = 'Requesting upload URL…'
+    const { uploadUrl } = await videosApi.getUploadUrl(moveId)
+
+    // Step 3: upload the file directly to S3 using the pre-signed URL
+    uploadProgress.value = 60
+    uploadProgressLabel.value = 'Uploading video…'
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'PUT',
+      body: selectedFile.value,
+      headers: { 'Content-Type': selectedFile.value.type },
+    })
+    if (!uploadResponse.ok) {
+      throw new Error(`Video upload failed (HTTP ${uploadResponse.status} ${uploadResponse.statusText}). Please try again.`)
+    }
+
+    uploadProgress.value = 100
+    uploadProgressLabel.value = 'Done!'
     successMessage.value = 'Move uploaded successfully!'
     form.name = ''
     form.description = ''
     form.difficulty = 'easy'
-    form.category = 'acrobalance'
     tagsInput.value = ''
+    selectedFile.value = null
+    if (fileInputRef.value) fileInputRef.value.value = ''
   } catch (err) {
     formError.value = err.message || 'Failed to upload move. Please try again.'
+    uploadProgress.value = null
   } finally {
     loading.value = false
   }
@@ -198,12 +247,6 @@ async function handleSubmit() {
   gap: 0.35rem;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
 .form-group label {
   font-size: 0.9rem;
   font-weight: 600;
@@ -220,6 +263,11 @@ async function handleSubmit() {
   color: var(--color-darkest);
   background: var(--color-white);
   transition: border-color 0.2s;
+}
+
+.form-group input[type="file"] {
+  padding: 0.5em 0.85em;
+  cursor: pointer;
 }
 
 .form-group input:focus,
@@ -251,6 +299,32 @@ async function handleSubmit() {
 .field-error {
   font-size: 0.82rem;
   color: #d9534f;
+}
+
+.progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.progress-label {
+  font-size: 0.85rem;
+  color: var(--color-mid-blue);
+  font-weight: 600;
+}
+
+.progress-bar-track {
+  height: 8px;
+  background: #d0eaf5;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--color-light-blue);
+  border-radius: 99px;
+  transition: width 0.4s ease;
 }
 
 .form-alert {
@@ -330,10 +404,6 @@ async function handleSubmit() {
 }
 
 @media (max-width: 500px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
   .upload-card {
     padding: 1.75rem 1.25rem;
   }
