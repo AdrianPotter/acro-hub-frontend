@@ -59,4 +59,20 @@ export const auth = {
 
 export const movesApi = {
   list: () => request('/moves'),
+  get: (moveId) => request(`/moves/${encodeURIComponent(moveId)}`),
+  create: (moveData) =>
+    request('/moves', {
+      method: 'POST',
+      body: JSON.stringify(moveData),
+    }),
+}
+
+export const videosApi = {
+  // POST is used per the API spec to obtain a pre-signed S3 upload URL
+  getUploadUrl: (moveId) =>
+    request(`/videos/${encodeURIComponent(moveId)}/upload-url`, {
+      method: 'POST',
+    }),
+  getViewUrl: (moveId) =>
+    request(`/videos/${encodeURIComponent(moveId)}/view-url`),
 }
