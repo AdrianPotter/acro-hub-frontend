@@ -76,7 +76,7 @@ onMounted(async () => {
   loading.value = false
 
   if (videoResult.status === 'fulfilled') {
-    videoUrl.value = videoResult.value?.viewUrl ?? ''
+    videoUrl.value = videoResult.value?.url ?? ''
     if (!videoUrl.value) {
       videoError.value = 'Video is not available yet.'
     }

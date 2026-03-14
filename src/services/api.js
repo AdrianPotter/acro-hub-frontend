@@ -74,5 +74,5 @@ export const videosApi = {
       method: 'POST',
     }),
   getViewUrl: (moveId) =>
-    request(`/videos/${encodeURIComponent(moveId)}/view-url`),
+    request(`/videos/${encodeURIComponent(moveId)}/url`),
 }
