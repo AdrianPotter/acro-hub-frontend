@@ -23,3 +23,8 @@ bucket_name = "acro-hub-frontend-your-unique-name"
 # domain_name = "acrohub.example.com"
 # route53_zone_id = "Z1234567890ABC"
 
+# Optional: Backend API domain name used by the CloudFront API proxy
+# Requests to /api/* are forwarded to this origin (with the /api prefix stripped).
+# Changing this moves the proxy target without requiring any frontend code changes.
+# api_domain_name = "api.acrohub.org"
+

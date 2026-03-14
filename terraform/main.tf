@@ -65,6 +65,26 @@ resource "aws_cloudfront_origin_access_control" "website" {
   signing_protocol                  = "sigv4"
 }
 
+# CloudFront Function – strips the /api prefix before forwarding requests to the
+# backend API origin so that /api/moves proxies to api.acrohub.org/moves etc.
+resource "aws_cloudfront_function" "api_rewrite" {
+  name    = "acro-hub-api-path-rewrite"
+  runtime = "cloudfront-js-2.0"
+  comment = "Strips /api prefix from request URIs when proxying to the backend API"
+  publish = true
+
+  code = <<-EOF
+    function handler(event) {
+      var request = event.request;
+      request.uri = request.uri.replace(/^\/api/, '');
+      if (!request.uri || request.uri === '') {
+        request.uri = '/';
+      }
+      return request;
+    }
+  EOF
+}
+
 # CloudFront distribution
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
@@ -77,6 +97,51 @@ resource "aws_cloudfront_distribution" "website" {
     domain_name              = aws_s3_bucket.website.bucket_regional_domain_name
     origin_id                = "S3-${var.bucket_name}"
     origin_access_control_id = aws_cloudfront_origin_access_control.website.id
+  }
+
+  # Backend API origin – requests are proxied here for /api/* paths so that the
+  # frontend and API share the same origin, avoiding CORS issues entirely.
+  origin {
+    domain_name = var.api_domain_name
+    origin_id   = "API-${var.api_domain_name}"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  # Proxy /api/* to the backend API.
+  # The CloudFront Function strips the /api prefix before the request reaches the origin.
+  # Caching is disabled so every API request reaches the origin.
+  ordered_cache_behavior {
+    path_pattern     = "/api/*"
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "API-${var.api_domain_name}"
+
+    forwarded_values {
+      query_string = true
+
+      headers = ["Authorization", "Content-Type", "Accept"]
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.api_rewrite.arn
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 0
+    compress               = true
   }
 
   default_cache_behavior {

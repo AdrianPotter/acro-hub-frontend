@@ -34,3 +34,8 @@ variable "route53_zone_id" {
   default     = ""
 }
 
+variable "api_domain_name" {
+  description = "Domain name of the backend API – used as the CloudFront API proxy origin"
+  type        = string
+  default     = "api.acrohub.org"
+}
