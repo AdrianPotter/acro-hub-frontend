@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { auth } from '../services/api.js'
 import { useAuth } from '../composables/useAuth.js'
 
 const router = useRouter()
-const { isLoggedIn, accessToken, clearAuth } = useAuth()
+const route = useRoute()
+const { isLoggedIn, accessToken, canUpload, canEdit, clearAuth } = useAuth()
 
 const menuOpen = ref(false)
 const movesDropdownOpen = ref(false)
@@ -17,6 +18,14 @@ const closeMenu = () => {
 }
 const toggleMovesDropdown = () => { movesDropdownOpen.value = !movesDropdownOpen.value }
 const closeMovesDropdown = () => { movesDropdownOpen.value = false }
+
+// Show an "Edit Move" link in the dropdown when viewing a specific move
+const currentMoveId = computed(() => {
+  if (route.name === 'move-detail') {
+    return route.params.moveId ?? null
+  }
+  return null
+})
 
 async function handleLogout() {
   const token = accessToken.value
@@ -71,7 +80,8 @@ async function handleLogout() {
           </button>
           <div class="nav-dropdown-menu" role="menu">
             <RouterLink to="/moves" role="menuitem" @click="closeMenu">Browse</RouterLink>
-            <RouterLink to="/moves/upload" role="menuitem" @click="closeMenu">Upload</RouterLink>
+            <RouterLink v-if="canUpload" to="/moves/upload" role="menuitem" @click="closeMenu">Upload</RouterLink>
+            <RouterLink v-if="canEdit && currentMoveId" :to="`/moves/${currentMoveId}/edit`" role="menuitem" @click="closeMenu">Edit Move</RouterLink>
           </div>
         </div>
         <template v-if="isLoggedIn">

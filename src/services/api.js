@@ -65,6 +65,15 @@ export const movesApi = {
       method: 'POST',
       body: JSON.stringify(moveData),
     }),
+  update: (moveId, moveData) =>
+    request(`/moves/${encodeURIComponent(moveId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(moveData),
+    }),
+  delete: (moveId) =>
+    request(`/moves/${encodeURIComponent(moveId)}`, {
+      method: 'DELETE',
+    }),
 }
 
 export const videosApi = {
