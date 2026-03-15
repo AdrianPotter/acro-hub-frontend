@@ -6,7 +6,6 @@
         <template v-if="move">
           <div class="move-badges">
             <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
-            <div v-if="move.category" class="move-badge category">{{ move.category }}</div>
           </div>
           <div class="header-title-row">
             <h1>{{ move.name }}</h1>
@@ -173,7 +172,6 @@ onMounted(async () => {
 .move-badge.difficulty.medium { background-color: #fff2cc; color: #7a5800; }
 .move-badge.difficulty.hard   { background-color: #fde0e0; color: #8b1a1a; }
 .move-badge.difficulty.expert { background-color: #f3d0f5; color: #5c1a6b; }
-.move-badge.category          { background-color: #e8f4fb; color: var(--color-mid-blue); }
 
 .detail-body {
   padding: 2.5rem 1.5rem;

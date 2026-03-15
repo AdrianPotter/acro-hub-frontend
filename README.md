@@ -31,7 +31,6 @@ The `Move` objects returned by `GET /moves` contain:
 | `name` | string | Move name |
 | `description` | string | Description |
 | `difficulty` | `easy` \| `medium` \| `hard` \| `expert` | Skill level |
-| `category` | `acrobalance` \| `hand-to-hand` \| `icarian` \| `washing-machine` | Style category |
 | `tags` | string[] | Free-form tags |
 
 ### Configuration

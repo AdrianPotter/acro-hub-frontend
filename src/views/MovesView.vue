@@ -41,7 +41,6 @@
               <RouterLink :to="`/moves/${move.moveId}`" class="move-card">
                 <div class="move-badges">
                   <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
-                  <div v-if="move.category" class="move-badge category">{{ move.category }}</div>
                 </div>
                 <h2 class="move-name">{{ move.name }}</h2>
                 <p class="move-desc">{{ move.description }}</p>
@@ -277,11 +276,6 @@ const filteredMoves = computed(() => {
 .move-badge.difficulty.expert {
   background-color: #f3d0f5;
   color: #5c1a6b;
-}
-
-.move-badge.category {
-  background-color: #e8f4fb;
-  color: var(--color-mid-blue);
 }
 
 .loading-text {
