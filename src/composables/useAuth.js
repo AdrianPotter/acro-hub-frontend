@@ -1,5 +1,17 @@
 import { ref, computed } from 'vue'
 
+// Parse a JWT payload to extract Cognito groups (for UI only — backend enforces authorisation)
+function parseJwtGroups(token) {
+  if (!token) return []
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const payload = JSON.parse(atob(base64))
+    return Array.isArray(payload['cognito:groups']) ? payload['cognito:groups'] : []
+  } catch {
+    return []
+  }
+}
+
 // idToken is used as the Bearer token for API requests (Cognito authorizer validates it)
 // accessToken is used only for the logout endpoint
 const idToken = ref(localStorage.getItem('idToken'))
@@ -18,6 +30,18 @@ const user = ref(safeParse('user'))
 
 export function useAuth() {
   const isLoggedIn = computed(() => !!idToken.value)
+
+  const userGroups = computed(() => parseJwtGroups(idToken.value))
+
+  // contributors, curators and admins can upload moves
+  const canUpload = computed(() =>
+    ['contributors', 'curators', 'admins'].some(g => userGroups.value.includes(g))
+  )
+
+  // curators and admins can edit and delete moves
+  const canEdit = computed(() =>
+    ['curators', 'admins'].some(g => userGroups.value.includes(g))
+  )
 
   function setAuth(tokens, userData) {
     idToken.value = tokens.idToken
@@ -49,6 +73,6 @@ export function useAuth() {
     localStorage.removeItem('user')
   }
 
-  return { idToken, accessToken, refreshToken, user, isLoggedIn, setAuth, clearAuth }
+  return { idToken, accessToken, refreshToken, user, isLoggedIn, userGroups, canUpload, canEdit, setAuth, clearAuth }
 }
 

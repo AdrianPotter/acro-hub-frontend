@@ -8,7 +8,10 @@
             <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
             <div v-if="move.category" class="move-badge category">{{ move.category }}</div>
           </div>
-          <h1>{{ move.name }}</h1>
+          <div class="header-title-row">
+            <h1>{{ move.name }}</h1>
+            <RouterLink v-if="canEdit" :to="`/moves/${moveId}/edit`" class="btn-edit-move">Edit Move</RouterLink>
+          </div>
         </template>
         <div v-else-if="!loading" class="header-placeholder">&nbsp;</div>
       </div>
@@ -50,9 +53,12 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { movesApi, videosApi } from '../services/api.js'
+import { useAuth } from '../composables/useAuth.js'
 
 const route = useRoute()
 const moveId = route.params.moveId
+
+const { canEdit } = useAuth()
 
 const move = ref(null)
 const loading = ref(true)
@@ -118,6 +124,33 @@ onMounted(async () => {
 .detail-header h1 {
   font-size: 2rem;
   margin: 0;
+}
+
+.header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-edit-move {
+  display: inline-block;
+  padding: 0.4em 1.1em;
+  border: 2px solid rgba(255,255,255,0.75);
+  border-radius: 6px;
+  color: var(--color-white);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-edit-move:hover {
+  background-color: rgba(255,255,255,0.15);
+  border-color: var(--color-white);
+  color: var(--color-white);
 }
 
 .move-badges {
