@@ -8,15 +8,9 @@ const router = useRouter()
 const { isLoggedIn, accessToken, clearAuth } = useAuth()
 
 const menuOpen = ref(false)
-const movesDropdownOpen = ref(false)
 
 const toggleMenu = () => { menuOpen.value = !menuOpen.value }
-const closeMenu = () => {
-  menuOpen.value = false
-  movesDropdownOpen.value = false
-}
-const toggleMovesDropdown = () => { movesDropdownOpen.value = !movesDropdownOpen.value }
-const closeMovesDropdown = () => { movesDropdownOpen.value = false }
+const closeMenu = () => { menuOpen.value = false }
 
 async function handleLogout() {
   const token = accessToken.value
@@ -51,29 +45,12 @@ async function handleLogout() {
       <nav :class="['nav-links', { open: menuOpen }]" role="navigation">
         <RouterLink to="/" @click="closeMenu">Home</RouterLink>
         <RouterLink to="/about" @click="closeMenu">About</RouterLink>
-        <div
+        <a
           v-if="isLoggedIn"
-          class="nav-dropdown"
-          :class="{ open: movesDropdownOpen }"
-          @mouseenter="movesDropdownOpen = true"
-          @mouseleave="movesDropdownOpen = false"
-        >
-          <button
-            class="nav-dropdown-trigger"
-            :aria-expanded="movesDropdownOpen"
-            aria-haspopup="true"
-            @click="toggleMovesDropdown"
-          >
-            Moves
-            <svg class="dropdown-chevron" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu">
-            <RouterLink to="/moves" role="menuitem" @click="closeMenu">Browse</RouterLink>
-            <RouterLink to="/moves/upload" role="menuitem" @click="closeMenu">Upload</RouterLink>
-          </div>
-        </div>
+          href="https://acrohub.org/moves"
+          rel="noopener noreferrer"
+          @click="closeMenu"
+        >Moves</a>
         <template v-if="isLoggedIn">
           <button class="btn-outline btn-logout" @click="handleLogout">Logout</button>
         </template>
@@ -190,76 +167,6 @@ async function handleLogout() {
   color: var(--color-white);
 }
 
-/* Dropdown */
-.nav-dropdown {
-  position: relative;
-}
-
-.nav-dropdown-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  background: none;
-  border: none;
-  color: var(--color-white);
-  font-weight: 500;
-  font-size: 0.95rem;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.2s;
-}
-
-.nav-dropdown-trigger:hover,
-.nav-dropdown.open .nav-dropdown-trigger {
-  color: var(--color-light-blue);
-}
-
-.dropdown-chevron {
-  width: 10px;
-  height: 10px;
-  transition: transform 0.2s;
-}
-
-.nav-dropdown.open .dropdown-chevron {
-  transform: rotate(180deg);
-}
-
-.nav-dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--color-dark-blue);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  min-width: 140px;
-  padding: 0.75rem 0 0.4rem;
-  z-index: 200;
-}
-
-.nav-dropdown.open .nav-dropdown-menu {
-  display: block;
-}
-
-.nav-dropdown-menu a {
-  display: block;
-  padding: 0.55em 1.1em;
-  color: var(--color-white);
-  font-weight: 500;
-  font-size: 0.95rem;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background-color 0.15s, color 0.15s;
-}
-
-.nav-dropdown-menu a:hover,
-.nav-dropdown-menu a.router-link-active {
-  background-color: rgba(255,255,255,0.08);
-  color: var(--color-light-blue);
-}
-
 .hamburger {
   display: none;
   flex-direction: column;
@@ -300,21 +207,6 @@ async function handleLogout() {
 
   .nav-links.open {
     display: flex;
-  }
-
-  .nav-dropdown {
-    width: 100%;
-  }
-
-  .nav-dropdown-menu {
-    position: static;
-    transform: none;
-    box-shadow: none;
-    border: none;
-    border-left: 2px solid rgba(255,255,255,0.15);
-    border-radius: 0;
-    padding: 0.25rem 0 0.25rem 0.75rem;
-    margin-top: 0.25rem;
   }
 }
 </style>
