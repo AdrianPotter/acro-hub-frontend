@@ -23,7 +23,7 @@
             />
             <button v-if="searchQuery" class="search-clear" @click="searchQuery = ''" aria-label="Clear search">✕</button>
           </div>
-          <RouterLink to="/moves/upload" class="btn-upload">+ Upload Move</RouterLink>
+          <RouterLink v-if="canUpload" to="/moves/upload" class="btn-upload">+ Upload Move</RouterLink>
         </div>
       </div>
     </section>
@@ -62,6 +62,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { movesApi } from '../services/api.js'
+import { useAuth } from '../composables/useAuth.js'
+
+const { canUpload } = useAuth()
 
 const searchQuery = ref('')
 const moves = ref([])
