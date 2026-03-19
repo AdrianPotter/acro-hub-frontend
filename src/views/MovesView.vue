@@ -4,7 +4,7 @@
       <div class="moves-header-inner">
         <h1>Move Library</h1>
         <p class="moves-subtitle">
-          Browse our collection of partner acrobatics moves. Use the search box to filter by name.
+          Browse our collection of partner acrobatics moves. Use the search box or tags to filter.
         </p>
         <div class="sort-controls" role="group" aria-label="Sort moves">
           <span class="sort-label">Sort:</span>
@@ -46,6 +46,24 @@
           </div>
           <RouterLink v-if="canUpload" to="/moves/upload" class="btn-upload">+ Upload Move</RouterLink>
         </div>
+        <div v-if="availableTags.length > 0" class="tag-filter" role="group" aria-label="Filter by tag">
+          <span class="tag-filter-label">Tags:</span>
+          <div class="tag-filter-chips">
+            <button
+              v-for="tag in availableTags"
+              :key="tag"
+              class="tag-chip"
+              :class="{ active: selectedTags.has(tag) }"
+              :aria-pressed="selectedTags.has(tag)"
+              @click="toggleTag(tag)"
+            >
+              {{ tag }}
+            </button>
+          </div>
+          <button v-if="selectedTags.size > 0" class="tag-filter-clear" @click="clearTags" aria-label="Clear tag filters">
+            Clear
+          </button>
+        </div>
       </div>
     </section>
 
@@ -55,7 +73,7 @@
         <div v-else-if="fetchError" class="fetch-error" role="alert">{{ fetchError }}</div>
         <template v-else>
           <p v-if="filteredMoves.length === 0" class="no-results">
-            No moves found matching "<strong>{{ searchQuery }}</strong>".
+            No moves found matching the current filters.
           </p>
           <ul v-else class="moves-grid" role="list">
             <li v-for="move in filteredMoves" :key="move.moveId">
@@ -81,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { movesApi } from '../services/api.js'
 import { useAuth } from '../composables/useAuth.js'
 
@@ -93,6 +111,7 @@ const loading = ref(true)
 const fetchError = ref('')
 const sortBy = ref('name')
 const sortDir = ref('asc')
+const selectedTags = reactive(new Set())
 
 const DIFFICULTY_ORDER = { easy: 0, medium: 1, hard: 2, expert: 3 }
 
@@ -103,6 +122,18 @@ function toggleSort(field) {
     sortBy.value = field
     sortDir.value = 'asc'
   }
+}
+
+function toggleTag(tag) {
+  if (selectedTags.has(tag)) {
+    selectedTags.delete(tag)
+  } else {
+    selectedTags.add(tag)
+  }
+}
+
+function clearTags() {
+  selectedTags.clear()
 }
 
 onMounted(async () => {
@@ -116,11 +147,28 @@ onMounted(async () => {
   }
 })
 
+const availableTags = computed(() => {
+  const tagSet = new Set()
+  for (const move of moves.value) {
+    if (Array.isArray(move.tags)) {
+      move.tags.forEach(t => tagSet.add(t))
+    }
+  }
+  return [...tagSet].sort((a, b) => a.localeCompare(b))
+})
+
 const filteredMoves = computed(() => {
   let result = moves.value
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase().trim()
     result = result.filter(m => m.name.toLowerCase().includes(q))
+  }
+
+  if (selectedTags.size > 0) {
+    const activeTags = [...selectedTags]
+    result = result.filter(m =>
+      Array.isArray(m.tags) && activeTags.some(t => m.tags.includes(t))
+    )
   }
 
   result = [...result].sort((a, b) => {
@@ -426,6 +474,72 @@ const filteredMoves = computed(() => {
   font-weight: 600;
   padding: 0.2em 0.6em;
   border-radius: 4px;
+}
+
+.tag-filter {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tag-filter-label {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding-top: 0.3em;
+  white-space: nowrap;
+}
+
+.tag-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.tag-chip {
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.85);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25em 0.75em;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.tag-chip:hover {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.6);
+  color: var(--color-white);
+}
+
+.tag-chip.active {
+  background: var(--color-light-blue);
+  border-color: var(--color-light-blue);
+  color: var(--color-darkest);
+}
+
+.tag-filter-clear {
+  background: none;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.75);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25em 0.75em;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.tag-filter-clear:hover {
+  border-color: rgba(255,255,255,0.8);
+  color: var(--color-white);
 }
 
 .results-count {
