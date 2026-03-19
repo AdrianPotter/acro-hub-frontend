@@ -6,6 +6,27 @@
         <p class="moves-subtitle">
           Browse our collection of partner acrobatics moves. Use the search box to filter by name.
         </p>
+        <div class="sort-controls" role="group" aria-label="Sort moves">
+          <span class="sort-label">Sort:</span>
+          <button
+            class="sort-btn"
+            :class="{ active: sortBy === 'name' }"
+            @click="toggleSort('name')"
+            :aria-pressed="sortBy === 'name'"
+          >
+            A–Z
+            <span class="sort-arrow" aria-hidden="true">{{ sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+          </button>
+          <button
+            class="sort-btn"
+            :class="{ active: sortBy === 'difficulty' }"
+            @click="toggleSort('difficulty')"
+            :aria-pressed="sortBy === 'difficulty'"
+          >
+            Difficulty
+            <span class="sort-arrow" aria-hidden="true">{{ sortBy === 'difficulty' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+          </button>
+        </div>
         <div class="moves-header-actions">
           <div class="search-wrapper">
             <label for="search" class="sr-only">Search moves</label>
@@ -70,6 +91,19 @@ const searchQuery = ref('')
 const moves = ref([])
 const loading = ref(true)
 const fetchError = ref('')
+const sortBy = ref('name')
+const sortDir = ref('asc')
+
+const DIFFICULTY_ORDER = { easy: 0, medium: 1, hard: 2, expert: 3 }
+
+function toggleSort(field) {
+  if (sortBy.value === field) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = field
+    sortDir.value = 'asc'
+  }
+}
 
 onMounted(async () => {
   try {
@@ -83,9 +117,28 @@ onMounted(async () => {
 })
 
 const filteredMoves = computed(() => {
-  if (!searchQuery.value.trim()) return moves.value
-  const q = searchQuery.value.toLowerCase().trim()
-  return moves.value.filter(m => m.name.toLowerCase().includes(q))
+  let result = moves.value
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase().trim()
+    result = result.filter(m => m.name.toLowerCase().includes(q))
+  }
+
+  result = [...result].sort((a, b) => {
+    if (sortBy.value === 'difficulty') {
+      const aRank = DIFFICULTY_ORDER[a.difficulty] ?? 999
+      const bRank = DIFFICULTY_ORDER[b.difficulty] ?? 999
+      const diff = aRank - bRank
+      if (diff !== 0) return sortDir.value === 'asc' ? diff : -diff
+      // Within same difficulty, sort alphabetically (respecting direction)
+      const cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      return sortDir.value === 'asc' ? cmp : -cmp
+    }
+    // Default: sort by name
+    const cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    return sortDir.value === 'asc' ? cmp : -cmp
+  })
+
+  return result
 })
 </script>
 
@@ -109,8 +162,54 @@ const filteredMoves = computed(() => {
 
 .moves-subtitle {
   color: rgba(255,255,255,0.82);
-  margin: 0 0 1.75rem;
+  margin: 0 0 1.25rem;
   font-size: 1.05rem;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.85);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.35em 0.9em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.sort-btn:hover {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.6);
+  color: var(--color-white);
+}
+
+.sort-btn.active {
+  background: var(--color-light-blue);
+  border-color: var(--color-light-blue);
+  color: var(--color-darkest);
+}
+
+.sort-arrow {
+  font-size: 0.95em;
 }
 
 .moves-header-actions {
