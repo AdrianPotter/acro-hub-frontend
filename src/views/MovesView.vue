@@ -46,6 +46,16 @@
           </div>
           <RouterLink v-if="canUpload" to="/moves/upload" class="btn-upload">+ Upload Move</RouterLink>
         </div>
+        <div v-if="canEdit" class="curator-filters">
+          <label class="curator-checkbox-label">
+            <input
+              type="checkbox"
+              v-model="filterEmptyDescription"
+              class="curator-checkbox"
+            />
+            Show only moves with empty descriptions
+          </label>
+        </div>
         <div v-if="availableTags.length > 0" class="tag-filter" role="group" aria-label="Filter by tag">
           <span class="tag-filter-label">Tags:</span>
           <div class="tag-filter-chips">
@@ -103,9 +113,10 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { movesApi } from '../services/api.js'
 import { useAuth } from '../composables/useAuth.js'
 
-const { canUpload } = useAuth()
+const { canUpload, canEdit } = useAuth()
 
 const searchQuery = ref('')
+const filterEmptyDescription = ref(false)
 const moves = ref([])
 const loading = ref(true)
 const fetchError = ref('')
@@ -169,6 +180,10 @@ const filteredMoves = computed(() => {
     result = result.filter(m =>
       Array.isArray(m.tags) && activeTags.some(t => m.tags.includes(t))
     )
+  }
+
+  if (filterEmptyDescription.value) {
+    result = result.filter(m => !m.description || !m.description.trim())
   }
 
   result = [...result].sort((a, b) => {
@@ -474,6 +489,29 @@ const filteredMoves = computed(() => {
   font-weight: 600;
   padding: 0.2em 0.6em;
   border-radius: 4px;
+}
+
+.curator-filters {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.9rem;
+}
+
+.curator-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.curator-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-light-blue);
+  cursor: pointer;
 }
 
 .tag-filter {
