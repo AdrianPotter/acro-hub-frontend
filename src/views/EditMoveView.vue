@@ -61,11 +61,6 @@
           <div v-if="formError" class="form-alert" role="alert">{{ formError }}</div>
           <div v-if="deleteError" class="form-alert" role="alert">{{ deleteError }}</div>
 
-          <div v-if="successMessage" class="form-success" role="status">
-            {{ successMessage }}
-            <RouterLink :to="`/moves/${moveId}`">View move →</RouterLink>
-          </div>
-
           <div class="form-actions">
             <RouterLink :to="`/moves/${moveId}`" class="btn-secondary">Cancel</RouterLink>
             <button
@@ -109,7 +104,6 @@ const deleteLoading = ref(false)
 const loadError = ref('')
 const formError = ref('')
 const deleteError = ref('')
-const successMessage = ref('')
 const errors = reactive({ name: '' })
 
 onMounted(async () => {
@@ -135,7 +129,6 @@ function validate() {
 
 async function handleUpdate() {
   formError.value = ''
-  successMessage.value = ''
   if (!validate()) return
 
   const tags = tagsInput.value
@@ -153,7 +146,7 @@ async function handleUpdate() {
   loading.value = true
   try {
     await movesApi.update(moveId, payload)
-    successMessage.value = 'Move updated successfully!'
+    router.push({ name: 'move-detail', params: { moveId } })
   } catch (err) {
     formError.value = err.message || 'Failed to update move. Please try again.'
   } finally {
