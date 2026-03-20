@@ -70,7 +70,7 @@ const { setAuth } = useAuth()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
-const formError = ref('')
+const formError = ref(route.query.sessionExpired ? 'Your session has expired, please log in again.' : '')
 const unconfirmedEmail = ref('')
 const errors = reactive({ email: '', password: '' })
 
