@@ -109,20 +109,33 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { movesApi } from '../services/api.js'
 import { useAuth } from '../composables/useAuth.js'
 
 const { canUpload, canEdit } = useAuth()
 
-const searchQuery = ref('')
-const filterEmptyDescription = ref(false)
+const MOVES_VIEW_STATE_KEY = 'movesViewState'
+
+function loadSavedState() {
+  try {
+    const saved = localStorage.getItem(MOVES_VIEW_STATE_KEY)
+    return saved ? JSON.parse(saved) : null
+  } catch {
+    return null
+  }
+}
+
+const savedState = loadSavedState()
+
+const searchQuery = ref(savedState?.searchQuery ?? '')
+const filterEmptyDescription = ref(savedState?.filterEmptyDescription ?? false)
 const moves = ref([])
 const loading = ref(true)
 const fetchError = ref('')
-const sortBy = ref('name')
-const sortDir = ref('asc')
-const selectedTags = reactive(new Set())
+const sortBy = ref(savedState?.sortBy ?? 'name')
+const sortDir = ref(savedState?.sortDir ?? 'asc')
+const selectedTags = reactive(new Set(savedState?.selectedTags ?? []))
 
 const DIFFICULTY_ORDER = { easy: 0, medium: 1, hard: 2, expert: 3 }
 
@@ -146,6 +159,23 @@ function toggleTag(tag) {
 function clearTags() {
   selectedTags.clear()
 }
+
+watch(
+  [searchQuery, filterEmptyDescription, sortBy, sortDir, selectedTags],
+  () => {
+    localStorage.setItem(
+      MOVES_VIEW_STATE_KEY,
+      JSON.stringify({
+        searchQuery: searchQuery.value,
+        filterEmptyDescription: filterEmptyDescription.value,
+        sortBy: sortBy.value,
+        sortDir: sortDir.value,
+        selectedTags: [...selectedTags],
+      })
+    )
+  },
+  { deep: true }
+)
 
 onMounted(async () => {
   try {
