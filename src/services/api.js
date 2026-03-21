@@ -1,4 +1,8 @@
+import router from '../router/index.js'
+import { useAuth } from '../composables/useAuth.js'
+
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const EXPIRED_TOKEN_MESSAGE = 'The incoming token has expired'
 
 if (import.meta.env.DEV && !import.meta.env.VITE_API_BASE_URL) {
   console.warn('[api] VITE_API_BASE_URL is not set. Copy .env.example to .env.local and configure it.')
@@ -21,6 +25,11 @@ async function request(path, options = {}) {
       message = body.error || body.message || body.detail || response.statusText
     } catch {
       message = response.statusText
+    }
+    if (message === EXPIRED_TOKEN_MESSAGE) {
+      const { clearAuth } = useAuth()
+      clearAuth()
+      router.push({ name: 'login', query: { sessionExpired: 'true' } })
     }
     const error = new Error(message)
     error.status = response.status
