@@ -20,19 +20,19 @@
 
         <div class="story-video-wrapper">
           <iframe
-            src="https://www.youtube.com/embed/MSX9ijqRX7s"
-            title="Acro Hub — Our Story"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
+              src="https://www.youtube.com/embed/MSX9ijqRX7s"
+              title="Acro Hub — Our Story"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
           ></iframe>
         </div>
 
         <div class="story-section">
           <h2>Where It Began</h2>
           <p>
-            We began dancing together through the university scene, where we each won the Inter Varsity Dance
-            Competition (IVDC) rock and roll division representing both Oxford and Cambridge, and were invited to
-            showcase at the event. Those early achievements reflected not just technical ability, but a shared
+            We began dancing together through the university scene in Cambridge, where we performed at various
+            competitions and events both individually and as a team. Our achievements included winning the Inter Varsity
+            Dance Competition (IVDC) rock and roll division. It was a start of a long partnership based around a shared
             approach to training, creativity, and performance that would shape everything that followed.
           </p>
         </div>
@@ -43,9 +43,10 @@
             Our focus quickly expanded beyond competing. We founded and coached the Oxford University Rock and Roll
             Team (OURnR), running it for six years. During that time, we didn't just maintain a successful team — we
             helped grow a pipeline of dancers, coaching multiple couples to win the IVDC rock and roll division
-            themselves. Alongside this, we choreographed and performed annual group routines, winning the Varsity
-            group performance every year the category ran during that period. This experience gave us a strong
-            understanding of how people learn acrobatics safely and effectively, from complete beginners through to
+            themselves. Having won IVDC again for Oxford ourselves, we were fortunate enough to subsequently be invited
+            back to perform as part of the event's professional showcase. Alongside this, we choreographed and performed
+            annual group routines, winning the Varsity group performance every year the category ran during that period.
+            This experience gave us a strong understanding of how people learn acrobatics safely and effectively, from complete beginners through to
             advanced performers.
           </p>
         </div>
