@@ -47,6 +47,7 @@ async function handleLogout() {
       <nav :class="['nav-links', { open: menuOpen }]" role="navigation">
         <RouterLink to="/" @click="closeMenu">Home</RouterLink>
         <RouterLink to="/about" @click="closeMenu">About</RouterLink>
+        <RouterLink to="/our-story" @click="closeMenu">Our Story</RouterLink>
         <a v-if="isLoggedIn" href="https://acrohub.org/moves">Moves</a>
         <template v-if="isLoggedIn">
           <button class="btn-outline btn-logout" @click="handleLogout">Logout</button>
