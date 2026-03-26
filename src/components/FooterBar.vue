@@ -8,6 +8,7 @@
       <nav class="footer-links" aria-label="Footer navigation">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/terms">Terms &amp; Conditions</RouterLink>
         <RouterLink v-if="isAuthenticated" to="/moves">Moves</RouterLink>
         <RouterLink v-if="!isAuthenticated" to="/login">Login</RouterLink>
         <RouterLink v-if="!isAuthenticated" to="/register">Register</RouterLink>

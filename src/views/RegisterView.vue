@@ -60,7 +60,7 @@
             />
             <span>
               I agree to the
-              <RouterLink to="/about">Terms &amp; Conditions</RouterLink>
+              <RouterLink to="/terms">Terms &amp; Conditions</RouterLink>
             </span>
           </label>
           <span v-if="errors.terms" class="field-error">{{ errors.terms }}</span>
