@@ -8,7 +8,29 @@ if (import.meta.env.DEV && !import.meta.env.VITE_API_BASE_URL) {
   console.warn('[api] VITE_API_BASE_URL is not set. Copy .env.example to .env.local and configure it.')
 }
 
-async function request(path, options = {}) {
+async function tryRefreshTokens() {
+  const storedRefreshToken = localStorage.getItem('refreshToken')
+  if (!storedRefreshToken || localStorage.getItem('rememberMe') !== 'true') {
+    return false
+  }
+  try {
+    const response = await fetch(`${BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: storedRefreshToken }),
+    })
+    if (!response.ok) return false
+    const data = await response.json()
+    const { setAuth } = useAuth()
+    // Refresh endpoint returns new accessToken + idToken but no new refreshToken — preserve the existing one
+    setAuth({ idToken: data.idToken, accessToken: data.accessToken, refreshToken: storedRefreshToken }, null, true)
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function request(path, options = {}, skipRefresh = false) {
   const idToken = localStorage.getItem('idToken')
   const headers = {
     'Content-Type': 'application/json',
@@ -27,6 +49,9 @@ async function request(path, options = {}) {
       message = response.statusText
     }
     if (message === EXPIRED_TOKEN_MESSAGE) {
+      if (!skipRefresh && await tryRefreshTokens()) {
+        return request(path, options, true)
+      }
       const { clearAuth } = useAuth()
       clearAuth()
       router.push({ name: 'login', query: { sessionExpired: 'true' } })
@@ -63,6 +88,12 @@ export const auth = {
     request('/auth/confirm-registration', {
       method: 'POST',
       body: JSON.stringify({ email, code }),
+    }),
+
+  refresh: (refreshToken) =>
+    request('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
     }),
 }
 
