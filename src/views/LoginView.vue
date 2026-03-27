@@ -36,6 +36,17 @@
           <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
         </div>
 
+        <div class="form-group remember-me">
+          <label class="remember-me-label">
+            <input
+              id="remember-me"
+              v-model="rememberMe"
+              type="checkbox"
+            />
+            Remember me
+          </label>
+        </div>
+
         <div v-if="formError" class="form-alert" role="alert">
           {{ formError }}
           <span v-if="unconfirmedEmail">
@@ -69,6 +80,7 @@ const { setAuth } = useAuth()
 
 const email = ref('')
 const password = ref('')
+const rememberMe = ref(false)
 const loading = ref(false)
 const formError = ref(route.query.sessionExpired ? 'Your session has expired, please log in again.' : '')
 const unconfirmedEmail = ref('')
@@ -99,7 +111,7 @@ async function handleLogin() {
   loading.value = true
   try {
     const data = await auth.login(email.value, password.value)
-    setAuth({ idToken: data.idToken, accessToken: data.accessToken, refreshToken: data.refreshToken }, null)
+    setAuth({ idToken: data.idToken, accessToken: data.accessToken, refreshToken: data.refreshToken }, null, rememberMe.value)
     const redirect = route.query.redirect || '/moves'
     router.push(redirect)
   } catch (err) {
@@ -218,6 +230,28 @@ input.error {
 .btn-submit:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+.remember-me {
+  flex-direction: row;
+  align-items: center;
+}
+
+.remember-me-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #555;
+  cursor: pointer;
+}
+
+.remember-me-label input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--color-light-blue);
 }
 
 .auth-footer-text {

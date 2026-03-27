@@ -17,6 +17,7 @@ function parseJwtGroups(token) {
 const idToken = ref(localStorage.getItem('idToken'))
 const accessToken = ref(localStorage.getItem('accessToken'))
 const refreshToken = ref(localStorage.getItem('refreshToken'))
+const rememberMe = ref(localStorage.getItem('rememberMe') === 'true')
 
 function safeParse(key) {
   try {
@@ -43,21 +44,25 @@ export function useAuth() {
     ['curators', 'admins'].some(g => userGroups.value.includes(g))
   )
 
-  function setAuth(tokens, userData) {
+  function setAuth(tokens, userData, remember = false) {
     idToken.value = tokens.idToken
     accessToken.value = tokens.accessToken
-    refreshToken.value = tokens.refreshToken ?? null
-    user.value = userData ?? null
+    rememberMe.value = remember
     localStorage.setItem('idToken', tokens.idToken)
     localStorage.setItem('accessToken', tokens.accessToken)
-    if (tokens.refreshToken) {
+    localStorage.setItem('rememberMe', remember ? 'true' : 'false')
+    if (remember && tokens.refreshToken) {
+      refreshToken.value = tokens.refreshToken
       localStorage.setItem('refreshToken', tokens.refreshToken)
     } else {
+      refreshToken.value = null
       localStorage.removeItem('refreshToken')
     }
     if (userData) {
+      user.value = userData
       localStorage.setItem('user', JSON.stringify(userData))
     } else {
+      user.value = null
       localStorage.removeItem('user')
     }
   }
@@ -66,13 +71,15 @@ export function useAuth() {
     idToken.value = null
     accessToken.value = null
     refreshToken.value = null
+    rememberMe.value = false
     user.value = null
     localStorage.removeItem('idToken')
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    localStorage.removeItem('rememberMe')
     localStorage.removeItem('user')
   }
 
-  return { idToken, accessToken, refreshToken, user, isLoggedIn, userGroups, canUpload, canEdit, setAuth, clearAuth }
+  return { idToken, accessToken, refreshToken, rememberMe, user, isLoggedIn, userGroups, canUpload, canEdit, setAuth, clearAuth }
 }
 
