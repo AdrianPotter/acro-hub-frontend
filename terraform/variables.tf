@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "bucket_name" {
   description = "Name of the S3 bucket (must be globally unique)"
   type        = string
-  default     = "acro-hub-frontend"
+  default     = "acrohub.org"
 }
 
 variable "environment" {
@@ -31,6 +31,6 @@ variable "domain_name" {
 variable "route53_zone_id" {
   description = "Route53 hosted zone ID (required if using custom domain)"
   type        = string
-  default     = ""
+  default     = "Z04501911GNFDYM9PBX6Y"
 }
 
