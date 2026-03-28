@@ -102,6 +102,60 @@ npm run preview
 
 ---
 
+## CI/CD with GitHub Actions
+
+Every push to `main` automatically builds and deploys the frontend via the workflow at `.github/workflows/deploy.yml`. No manual steps are needed after the one-time setup below.
+
+### How it works
+
+1. Checks out the code
+2. Installs dependencies and builds the app (`npm run build`)
+3. Syncs the `dist/` folder to S3, removing files that no longer exist (`--delete`)
+4. Invalidates the CloudFront cache so visitors see the latest version immediately
+
+### One-time setup
+
+#### 1. Create the GitHub Actions IAM user with Terraform
+
+The Terraform configuration creates a dedicated IAM user (`<bucket-name>-github-actions`) with a least-privilege policy: it can only sync objects to the S3 bucket and invalidate the CloudFront distribution. Run Terraform if you haven't already:
+
+```bash
+cd terraform
+terraform init
+terraform apply
+```
+
+#### 2. Retrieve the generated AWS credentials
+
+```bash
+cd terraform
+terraform output github_actions_access_key_id
+terraform output -raw github_actions_secret_access_key
+```
+
+> **Note:** The secret access key is only accessible immediately after creation. If you lose it, recreate the access key by running:
+> ```bash
+> terraform taint aws_iam_access_key.github_actions
+> terraform apply
+> ```
+> Then update the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` secrets in GitHub.
+
+#### 3. Add GitHub repository secrets
+
+Go to your repository → **Settings → Secrets and variables → Actions → New repository secret** and add the following:
+
+| Secret name | Where to get the value |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | `terraform output github_actions_access_key_id` |
+| `AWS_SECRET_ACCESS_KEY` | `terraform output -raw github_actions_secret_access_key` |
+| `AWS_REGION` | The region in `terraform/variables.tf` (default: `eu-west-1`) |
+| `S3_BUCKET_NAME` | `terraform output s3_bucket_name` |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `terraform output cloudfront_distribution_id` |
+
+Once these secrets are set, every push to `main` will trigger an automatic deployment.
+
+---
+
 ## Deploying to AWS with Terraform
 
 This project includes Terraform configuration to deploy the frontend to AWS with:
@@ -256,6 +310,9 @@ acro-hub-frontend/
 │   ├── terraform.tfvars.example  # Example configuration
 │   └── README.md        # Detailed deployment guide
 ├── .env.example         # Environment variable template
+├── .github/
+│   └── workflows/
+│       └── deploy.yml   # GitHub Actions deploy workflow (push to main)
 ├── deploy.sh            # Deployment script (Bash)
 ├── deploy.ps1           # Deployment script (PowerShell)
 ├── index.html           # HTML entry point

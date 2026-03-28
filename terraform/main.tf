@@ -203,6 +203,51 @@ resource "aws_route53_record" "cert_validation" {
   zone_id         = var.route53_zone_id
 }
 
+# IAM user for GitHub Actions deployments
+resource "aws_iam_user" "github_actions" {
+  name = "${var.bucket_name}-github-actions"
+
+  tags = {
+    Name        = "Acro Hub Frontend GitHub Actions"
+    Environment = var.environment
+  }
+}
+
+resource "aws_iam_access_key" "github_actions" {
+  user = aws_iam_user.github_actions.name
+}
+
+resource "aws_iam_user_policy" "github_actions" {
+  name = "${var.bucket_name}-github-actions-policy"
+  user = aws_iam_user.github_actions.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "S3SyncAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.website.arn,
+          "${aws_s3_bucket.website.arn}/*"
+        ]
+      },
+      {
+        Sid      = "CloudFrontInvalidation"
+        Effect   = "Allow"
+        Action   = "cloudfront:CreateInvalidation"
+        Resource = aws_cloudfront_distribution.website.arn
+      }
+    ]
+  })
+}
+
 # Route53 A record for custom domain (optional)
 resource "aws_route53_record" "website" {
   count = var.domain_name != "" ? 1 : 0
