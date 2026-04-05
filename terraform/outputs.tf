@@ -23,8 +23,15 @@ output "website_url" {
   value       = "https://${var.domain_name}"
 }
 
-output "acm_certificate_arn" {
-  description = "ARN of the ACM certificate (if using custom domain)"
-  value       = aws_acm_certificate.cert[0].arn
+output "github_actions_access_key_id" {
+  description = "AWS access key ID for the GitHub Actions IAM user"
+  value       = aws_iam_access_key.github_actions.id
+  sensitive   = true
+}
+
+output "github_actions_secret_access_key" {
+  description = "AWS secret access key for the GitHub Actions IAM user (sensitive)"
+  value       = aws_iam_access_key.github_actions.secret
+  sensitive   = true
 }
 
