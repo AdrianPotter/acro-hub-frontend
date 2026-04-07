@@ -54,6 +54,16 @@
           </div>
 
           <div class="form-group">
+            <label for="alternateNames">Alternate names <span class="hint">(comma-separated)</span></label>
+            <input
+              id="alternateNames"
+              v-model="alternateNamesInput"
+              type="text"
+              placeholder="e.g. Star Pose, Side Star"
+            />
+          </div>
+
+          <div class="form-group">
             <label for="video">Video <span class="required" aria-hidden="true">*</span></label>
             <input
               id="video"
@@ -104,6 +114,7 @@ const form = reactive({
   difficulty: 'easy',
 })
 const tagsInput = ref('')
+const alternateNamesInput = ref('')
 const selectedFile = ref(null)
 const fileInputRef = ref(null)
 const loading = ref(false)
@@ -144,12 +155,18 @@ async function handleSubmit() {
     .map(t => t.trim())
     .filter(t => t.length > 0)
 
+  const alternateNames = alternateNamesInput.value
+    .split(',')
+    .map(n => n.trim())
+    .filter(n => n.length > 0)
+
   const payload = {
     name: form.name.trim(),
     difficulty: form.difficulty,
   }
   if (form.description.trim()) payload.description = form.description.trim()
   if (tags.length > 0) payload.tags = tags
+  if (alternateNames.length > 0) payload.alternateNames = alternateNames
 
   loading.value = true
   try {
@@ -183,6 +200,7 @@ async function handleSubmit() {
     form.description = ''
     form.difficulty = 'easy'
     tagsInput.value = ''
+    alternateNamesInput.value = ''
     selectedFile.value = null
     if (fileInputRef.value) fileInputRef.value.value = ''
   } catch (err) {

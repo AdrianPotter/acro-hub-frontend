@@ -58,6 +58,17 @@
             />
           </div>
 
+          <div class="form-group">
+            <label for="alternateNames">Alternate names <span class="hint">(comma-separated)</span></label>
+            <input
+              id="alternateNames"
+              v-model="alternateNamesInput"
+              type="text"
+              placeholder="e.g. Star Pose, Side Star"
+              :disabled="loading || deleteLoading"
+            />
+          </div>
+
           <div v-if="formError" class="form-alert" role="alert">{{ formError }}</div>
           <div v-if="deleteError" class="form-alert" role="alert">{{ deleteError }}</div>
 
@@ -98,6 +109,7 @@ const form = reactive({
   difficulty: 'easy',
 })
 const tagsInput = ref('')
+const alternateNamesInput = ref('')
 
 const loading = ref(false)
 const deleteLoading = ref(false)
@@ -113,6 +125,7 @@ onMounted(async () => {
     form.description = move.description ?? ''
     form.difficulty = move.difficulty ?? 'easy'
     tagsInput.value = Array.isArray(move.tags) ? move.tags.join(', ') : ''
+    alternateNamesInput.value = Array.isArray(move.alternateNames) ? move.alternateNames.join(', ') : ''
   } catch (err) {
     loadError.value = err.message || 'Failed to load move details.'
   }
@@ -136,12 +149,18 @@ async function handleUpdate() {
     .map(t => t.trim())
     .filter(t => t.length > 0)
 
+  const alternateNames = alternateNamesInput.value
+    .split(',')
+    .map(n => n.trim())
+    .filter(n => n.length > 0)
+
   const payload = {
     name: form.name.trim(),
     difficulty: form.difficulty,
   }
   if (form.description.trim()) payload.description = form.description.trim()
   if (tags.length > 0) payload.tags = tags
+  payload.alternateNames = alternateNames
 
   loading.value = true
   try {

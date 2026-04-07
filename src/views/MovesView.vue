@@ -202,7 +202,10 @@ const filteredMoves = computed(() => {
   let result = moves.value
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase().trim()
-    result = result.filter(m => m.name.toLowerCase().includes(q))
+    result = result.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      (Array.isArray(m.alternateNames) && m.alternateNames.some(n => n.toLowerCase().includes(q)))
+    )
   }
 
   if (selectedTags.size > 0) {
