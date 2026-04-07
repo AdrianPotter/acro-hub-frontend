@@ -38,6 +38,10 @@
 
           <div class="move-meta">
             <p v-if="move.description" class="move-description">{{ move.description }}</p>
+            <div v-if="move.alternateNames && move.alternateNames.length" class="move-alternate-names">
+              <span class="alternate-names-label">Also known as:</span>
+              <span v-for="name in move.alternateNames" :key="name" class="alternate-name">{{ name }}</span>
+            </div>
             <div v-if="move.tags && move.tags.length" class="move-tags">
               <span v-for="tag in move.tags" :key="tag" class="tag">{{ tag }}</span>
             </div>
@@ -208,6 +212,29 @@ onMounted(async () => {
   font-size: 1rem;
   line-height: 1.7;
   margin: 0;
+}
+
+.move-alternate-names {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.alternate-names-label {
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.alternate-name {
+  background-color: #f0f0f0;
+  color: #555;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2em 0.65em;
+  border-radius: 4px;
 }
 
 .move-tags {
