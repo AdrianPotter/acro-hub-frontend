@@ -160,7 +160,7 @@ async function handleUpdate() {
   }
   if (form.description.trim()) payload.description = form.description.trim()
   if (tags.length > 0) payload.tags = tags
-  if (alternateNames.length > 0) payload.alternateNames = alternateNames
+  payload.alternateNames = alternateNames
 
   loading.value = true
   try {
