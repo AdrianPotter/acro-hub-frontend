@@ -27,52 +27,52 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="u in users" :key="u.sub || u.username" :class="{ disabled: !u.enabled }">
+                <tr v-for="user in users" :key="user.sub || user.username" :class="{ disabled: !user.enabled }">
                   <td class="cell-email">
-                    <span class="email-text">{{ u.email || u.username }}</span>
-                    <span v-if="u.name" class="name-text">{{ u.name }}</span>
+                    <span class="email-text">{{ user.email || user.username }}</span>
+                    <span v-if="user.name" class="name-text">{{ user.name }}</span>
                   </td>
                   <td class="cell-status">
-                    <span class="badge" :class="statusBadgeClass(u)">
-                      {{ u.enabled ? (u.status || 'Active') : 'Disabled' }}
+                    <span class="badge" :class="statusBadgeClass(user)">
+                      {{ user.enabled ? (user.status || 'Active') : 'Disabled' }}
                     </span>
                   </td>
                   <td class="cell-groups">
-                    <span v-if="u.groups && u.groups.length > 0" class="groups-list">
-                      <span v-for="g in u.groups" :key="g" class="group-chip" :class="g">{{ g }}</span>
+                    <span v-if="user.groups && user.groups.length > 0" class="groups-list">
+                      <span v-for="group in user.groups" :key="group" class="group-chip" :class="group">{{ group }}</span>
                     </span>
                     <span v-else class="no-groups">—</span>
                   </td>
-                  <td class="cell-created">{{ formatDate(u.createdAt) }}</td>
+                  <td class="cell-created">{{ formatDate(user.createdAt) }}</td>
                   <td class="cell-actions">
                     <div class="action-row">
                       <button
                         class="btn-action btn-groups"
-                        :disabled="actionLoading[u.username]"
-                        @click="openGroupsModal(u)"
-                        :aria-label="`Edit groups for ${u.email || u.username}`"
+                        :disabled="actionLoading[user.username]"
+                        @click="openGroupsModal(user)"
+                        :aria-label="`Edit groups for ${user.email || user.username}`"
                       >
                         Groups
                       </button>
                       <button
                         class="btn-action"
-                        :class="u.enabled ? 'btn-disable' : 'btn-enable'"
-                        :disabled="actionLoading[u.username]"
-                        @click="toggleEnabled(u)"
-                        :aria-label="u.enabled ? `Disable ${u.email || u.username}` : `Enable ${u.email || u.username}`"
+                        :class="user.enabled ? 'btn-disable' : 'btn-enable'"
+                        :disabled="actionLoading[user.username]"
+                        @click="toggleEnabled(user)"
+                        :aria-label="user.enabled ? `Disable ${user.email || user.username}` : `Enable ${user.email || user.username}`"
                       >
-                        {{ u.enabled ? 'Disable' : 'Enable' }}
+                        {{ user.enabled ? 'Disable' : 'Enable' }}
                       </button>
                       <button
                         class="btn-action btn-delete"
-                        :disabled="actionLoading[u.username]"
-                        @click="confirmDelete(u)"
-                        :aria-label="`Delete ${u.email || u.username}`"
+                        :disabled="actionLoading[user.username]"
+                        @click="openDeleteModal(user)"
+                        :aria-label="`Delete ${user.email || user.username}`"
                       >
                         Delete
                       </button>
                     </div>
-                    <p v-if="actionErrors[u.username]" class="row-error" role="alert">{{ actionErrors[u.username] }}</p>
+                    <p v-if="actionErrors[user.username]" class="row-error" role="alert">{{ actionErrors[user.username] }}</p>
                   </td>
                 </tr>
               </tbody>
@@ -87,21 +87,21 @@
     </section>
 
     <!-- Edit Groups Modal -->
-    <div v-if="groupsModal.open" class="modal-overlay" role="dialog" aria-modal="true" :aria-labelledby="'modal-title'" @click.self="closeGroupsModal">
+    <div v-if="groupsModal.open" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="groups-modal-title" @click.self="closeGroupsModal">
       <div class="modal-card">
-        <h2 id="modal-title" class="modal-title">Edit Groups</h2>
+        <h2 id="groups-modal-title" class="modal-title">Edit Groups</h2>
         <p class="modal-subtitle">{{ groupsModal.user?.email || groupsModal.user?.username }}</p>
 
         <fieldset class="groups-fieldset">
           <legend class="sr-only">Select groups</legend>
-          <label v-for="g in ALL_GROUPS" :key="g" class="group-checkbox-label">
+          <label v-for="group in ALL_GROUPS" :key="group" class="group-checkbox-label">
             <input
               type="checkbox"
-              :value="g"
+              :value="group"
               v-model="groupsModal.selected"
               class="group-checkbox"
             />
-            {{ g }}
+            {{ group }}
           </label>
         </fieldset>
 
@@ -112,6 +112,27 @@
           <button class="btn-submit" :disabled="groupsModal.saving" @click="saveGroups">
             <span v-if="groupsModal.saving">Saving…</span>
             <span v-else>Save</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="deleteModal.open" class="modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title" aria-describedby="delete-modal-desc" @click.self="closeDeleteModal">
+      <div class="modal-card">
+        <h2 id="delete-modal-title" class="modal-title modal-title-danger">Delete User</h2>
+        <p id="delete-modal-desc" class="modal-subtitle">
+          Permanently delete <strong>{{ deleteModal.user?.email || deleteModal.user?.username }}</strong>?
+          This action cannot be undone.
+        </p>
+
+        <p v-if="deleteModal.error" class="modal-error" role="alert">{{ deleteModal.error }}</p>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" :disabled="deleteModal.deleting" @click="closeDeleteModal">Cancel</button>
+          <button class="btn-action btn-delete btn-delete-modal" :disabled="deleteModal.deleting" @click="executeDelete">
+            <span v-if="deleteModal.deleting">Deleting…</span>
+            <span v-else>Delete</span>
           </button>
         </div>
       </div>
@@ -141,6 +162,13 @@ const groupsModal = reactive({
   error: '',
 })
 
+const deleteModal = reactive({
+  open: false,
+  user: null,
+  deleting: false,
+  error: '',
+})
+
 onMounted(async () => {
   try {
     const data = await usersApi.list()
@@ -163,47 +191,60 @@ function formatDate(dateStr) {
   }
 }
 
-function statusBadgeClass(u) {
-  if (!u.enabled) return 'badge-disabled'
-  if (u.status === 'CONFIRMED') return 'badge-active'
-  if (u.status === 'UNCONFIRMED') return 'badge-unconfirmed'
+function statusBadgeClass(user) {
+  if (!user.enabled) return 'badge-disabled'
+  if (user.status === 'CONFIRMED') return 'badge-active'
+  if (user.status === 'UNCONFIRMED') return 'badge-unconfirmed'
   return 'badge-other'
 }
 
-async function toggleEnabled(u) {
-  actionErrors[u.username] = ''
-  actionLoading[u.username] = true
+async function toggleEnabled(user) {
+  actionErrors[user.username] = ''
+  actionLoading[user.username] = true
   try {
-    if (u.enabled) {
-      await usersApi.disable(u.username)
-      u.enabled = false
+    if (user.enabled) {
+      await usersApi.disable(user.username)
+      user.enabled = false
     } else {
-      await usersApi.enable(u.username)
-      u.enabled = true
+      await usersApi.enable(user.username)
+      user.enabled = true
     }
   } catch (err) {
-    actionErrors[u.username] = err.message || 'Action failed. Please try again.'
+    actionErrors[user.username] = err.message || 'Action failed. Please try again.'
   } finally {
-    actionLoading[u.username] = false
+    actionLoading[user.username] = false
   }
 }
 
-async function confirmDelete(u) {
-  if (!confirm(`Permanently delete "${u.email || u.username}"? This cannot be undone.`)) return
-  actionErrors[u.username] = ''
-  actionLoading[u.username] = true
+function openDeleteModal(user) {
+  deleteModal.user = user
+  deleteModal.error = ''
+  deleteModal.deleting = false
+  deleteModal.open = true
+}
+
+function closeDeleteModal() {
+  deleteModal.open = false
+  deleteModal.user = null
+}
+
+async function executeDelete() {
+  const user = deleteModal.user
+  deleteModal.error = ''
+  deleteModal.deleting = true
   try {
-    await usersApi.delete(u.username)
-    users.value = users.value.filter(x => x.username !== u.username)
+    await usersApi.delete(user.username)
+    users.value = users.value.filter(x => x.username !== user.username)
+    closeDeleteModal()
   } catch (err) {
-    actionErrors[u.username] = err.message || 'Delete failed. Please try again.'
-    actionLoading[u.username] = false
+    deleteModal.error = err.message || 'Delete failed. Please try again.'
+    deleteModal.deleting = false
   }
 }
 
-function openGroupsModal(u) {
-  groupsModal.user = u
-  groupsModal.selected = Array.isArray(u.groups) ? [...u.groups] : []
+function openGroupsModal(user) {
+  groupsModal.user = user
+  groupsModal.selected = Array.isArray(user.groups) ? [...user.groups] : []
   groupsModal.error = ''
   groupsModal.saving = false
   groupsModal.open = true
@@ -535,6 +576,16 @@ async function saveGroups() {
   font-size: 1.35rem;
   color: var(--color-dark-blue);
   margin: 0 0 0.2rem;
+}
+
+.modal-title-danger {
+  color: #780000;
+}
+
+.btn-delete-modal {
+  padding: 0.6em 1.5em;
+  font-size: 0.95rem;
+  border-width: 2px;
 }
 
 .modal-subtitle {
