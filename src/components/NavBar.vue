@@ -5,7 +5,7 @@ import { auth } from '../services/api.js'
 import { useAuth } from '../composables/useAuth.js'
 
 const router = useRouter()
-const { isLoggedIn, accessToken, clearAuth } = useAuth()
+const { isLoggedIn, accessToken, clearAuth, isAdmin } = useAuth()
 
 const menuOpen = ref(false)
 
@@ -49,6 +49,7 @@ async function handleLogout() {
         <RouterLink to="/about" @click="closeMenu">About</RouterLink>
         <RouterLink to="/our-story" @click="closeMenu">Our Story</RouterLink>
         <a v-if="isLoggedIn" href="https://acrohub.org/moves">Moves</a>
+        <RouterLink v-if="isAdmin" to="/admin/users" @click="closeMenu">Users</RouterLink>
         <template v-if="isLoggedIn">
           <button class="btn-outline btn-logout" @click="handleLogout">Logout</button>
         </template>
