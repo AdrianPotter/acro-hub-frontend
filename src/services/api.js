@@ -125,3 +125,19 @@ export const videosApi = {
   getViewUrl: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/url`),
 }
+
+export const usersApi = {
+  list: () => request('/users'),
+  get: (username) => request(`/users/${encodeURIComponent(username)}`),
+  delete: (username) =>
+    request(`/users/${encodeURIComponent(username)}`, { method: 'DELETE' }),
+  updateGroups: (username, groups) =>
+    request(`/users/${encodeURIComponent(username)}/groups`, {
+      method: 'PUT',
+      body: JSON.stringify({ groups }),
+    }),
+  disable: (username) =>
+    request(`/users/${encodeURIComponent(username)}/disable`, { method: 'POST' }),
+  enable: (username) =>
+    request(`/users/${encodeURIComponent(username)}/enable`, { method: 'POST' }),
+}

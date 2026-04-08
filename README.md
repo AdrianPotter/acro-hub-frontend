@@ -18,6 +18,12 @@ This SPA connects to the [Acro Hub Backend](https://github.com/AdrianPotter/acro
 | `POST` | `/auth/logout` | accessToken | Globally revoke all Cognito tokens |
 | `POST` | `/auth/register` | No | Create a new account; returns `{ message, userSub, confirmed }` |
 | `GET` | `/moves` | idToken (Bearer) | Return all moves as `{ moves: Move[], count: N }` |
+| `GET` | `/users` | idToken — admins only | List all Cognito users with groups and metadata |
+| `GET` | `/users/{username}` | idToken — admins only | Get a single user's details and group memberships |
+| `DELETE` | `/users/{username}` | idToken — admins only | Permanently delete a user |
+| `PUT` | `/users/{username}/groups` | idToken — admins only | Replace a user's group memberships |
+| `POST` | `/users/{username}/disable` | idToken — admins only | Disable a user account |
+| `POST` | `/users/{username}/enable` | idToken — admins only | Re-enable a previously disabled user |
 
 The `idToken` (Cognito ID token) is stored in `localStorage` and sent as `Authorization: Bearer <idToken>` on all authenticated requests. The `accessToken` is stored separately and used only for the `/auth/logout` call.
 
@@ -52,6 +58,7 @@ VITE_API_BASE_URL=https://api.acrohub.org
 | `/login` | Login form (email + password) |
 | `/register` | Registration form (email, password, confirm password, T&C checkbox) |
 | `/moves` | Searchable list of acrobatics moves |
+| `/admin/users` | Admin-only user management: list users, edit groups, disable/enable, delete |
 
 ## Colour Palette
 
@@ -299,7 +306,8 @@ acro-hub-frontend/
 │   │   ├── AboutView.vue
 │   │   ├── LoginView.vue
 │   │   ├── RegisterView.vue
-│   │   └── MovesView.vue
+│   │   ├── MovesView.vue
+│   │   └── UserManagementView.vue
 │   ├── App.vue          # Root component
 │   ├── main.js          # App entry point
 │   └── style.css        # Global styles & CSS variables

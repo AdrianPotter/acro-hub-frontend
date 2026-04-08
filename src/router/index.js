@@ -10,6 +10,7 @@ import MovesView from '../views/MovesView.vue'
 import UploadMoveView from '../views/UploadMoveView.vue'
 import MoveDetailView from '../views/MoveDetailView.vue'
 import EditMoveView from '../views/EditMoveView.vue'
+import UserManagementView from '../views/UserManagementView.vue'
 import { useAuth } from '../composables/useAuth.js'
 
 const routes = [
@@ -24,6 +25,7 @@ const routes = [
   { path: '/moves/upload', name: 'upload-move', component: UploadMoveView, meta: { requiresAuth: true, requiresCanUpload: true } },
   { path: '/moves/:moveId/edit', name: 'edit-move', component: EditMoveView, meta: { requiresAuth: true, requiresCanEdit: true } },
   { path: '/moves/:moveId', name: 'move-detail', component: MoveDetailView, meta: { requiresAuth: true } },
+  { path: '/admin/users', name: 'admin-users', component: UserManagementView, meta: { requiresAuth: true, requiresAdmin: true } },
 ]
 
 const router = createRouter({
@@ -35,7 +37,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const { isLoggedIn, canUpload, canEdit } = useAuth()
+  const { isLoggedIn, canUpload, canEdit, isAdmin } = useAuth()
   if (to.meta.requiresAuth && !isLoggedIn.value) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
@@ -44,6 +46,9 @@ router.beforeEach((to) => {
   }
   if (to.meta.requiresCanEdit && !canEdit.value) {
     return { name: 'moves' }
+  }
+  if (to.meta.requiresAdmin && !isAdmin.value) {
+    return { name: 'home' }
   }
 })
 

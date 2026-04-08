@@ -44,6 +44,8 @@ export function useAuth() {
     ['curators', 'admins'].some(g => userGroups.value.includes(g))
   )
 
+  const isAdmin = computed(() => userGroups.value.includes('admins'))
+
   function setAuth(tokens, userData, remember = false) {
     idToken.value = tokens.idToken
     accessToken.value = tokens.accessToken
@@ -80,6 +82,6 @@ export function useAuth() {
     localStorage.removeItem('user')
   }
 
-  return { idToken, accessToken, refreshToken, rememberMe, user, isLoggedIn, userGroups, canUpload, canEdit, setAuth, clearAuth }
+  return { idToken, accessToken, refreshToken, rememberMe, user, isLoggedIn, userGroups, canUpload, canEdit, isAdmin, setAuth, clearAuth }
 }
 
