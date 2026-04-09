@@ -47,6 +47,22 @@
           </label>
         </div>
 
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input
+              id="terms"
+              v-model="agreedToTerms"
+              type="checkbox"
+              :class="{ error: errors.terms }"
+            />
+            <span>
+              I agree to the
+              <RouterLink to="/terms">Terms &amp; Conditions</RouterLink>
+            </span>
+          </label>
+          <span v-if="errors.terms" class="field-error">{{ errors.terms }}</span>
+        </div>
+
         <div v-if="formError" class="form-alert" role="alert">
           {{ formError }}
           <span v-if="unconfirmedEmail">
@@ -81,14 +97,16 @@ const { setAuth } = useAuth()
 const email = ref('')
 const password = ref('')
 const rememberMe = ref(false)
+const agreedToTerms = ref(false)
 const loading = ref(false)
 const formError = ref(route.query.sessionExpired ? 'Your session has expired, please log in again.' : '')
 const unconfirmedEmail = ref('')
-const errors = reactive({ email: '', password: '' })
+const errors = reactive({ email: '', password: '', terms: '' })
 
 function validate() {
   errors.email = ''
   errors.password = ''
+  errors.terms = ''
   let valid = true
   if (!email.value) {
     errors.email = 'Email is required.'
@@ -99,6 +117,10 @@ function validate() {
   }
   if (!password.value) {
     errors.password = 'Password is required.'
+    valid = false
+  }
+  if (!agreedToTerms.value) {
+    errors.terms = 'You must agree to the Terms & Conditions.'
     valid = false
   }
   return valid
@@ -199,6 +221,33 @@ input.error {
 .field-error {
   font-size: 0.82rem;
   color: #d9534f;
+}
+
+.checkbox-group {
+  gap: 0.25rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-weight: 400 !important;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.checkbox-label input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: var(--color-mid-blue);
+  cursor: pointer;
+}
+
+.checkbox-label input[type='checkbox'].error {
+  outline: 2px solid #d9534f;
 }
 
 .form-alert {

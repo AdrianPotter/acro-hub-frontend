@@ -50,22 +50,6 @@
           <span v-if="errors.confirmPassword" class="field-error">{{ errors.confirmPassword }}</span>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input
-              id="terms"
-              v-model="agreedToTerms"
-              type="checkbox"
-              :class="{ error: errors.terms }"
-            />
-            <span>
-              I agree to the
-              <RouterLink to="/terms">Terms &amp; Conditions</RouterLink>
-            </span>
-          </label>
-          <span v-if="errors.terms" class="field-error">{{ errors.terms }}</span>
-        </div>
-
         <div v-if="formError" class="form-alert" role="alert">{{ formError }}</div>
         <div v-if="successMessage" class="form-success" role="status">{{ successMessage }}</div>
 
@@ -93,17 +77,15 @@ const router = useRouter()
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
-const agreedToTerms = ref(false)
 const loading = ref(false)
 const formError = ref('')
 const successMessage = ref('')
-const errors = reactive({ email: '', password: '', confirmPassword: '', terms: '' })
+const errors = reactive({ email: '', password: '', confirmPassword: '' })
 
 function validate() {
   errors.email = ''
   errors.password = ''
   errors.confirmPassword = ''
-  errors.terms = ''
   let valid = true
 
   if (!email.value) {
@@ -127,11 +109,6 @@ function validate() {
     valid = false
   } else if (password.value !== confirmPassword.value) {
     errors.confirmPassword = 'Passwords do not match.'
-    valid = false
-  }
-
-  if (!agreedToTerms.value) {
-    errors.terms = 'You must agree to the Terms & Conditions.'
     valid = false
   }
 
@@ -222,33 +199,6 @@ h1 {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-dark-blue);
-}
-
-.checkbox-group {
-  gap: 0.25rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  font-weight: 400 !important;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  accent-color: var(--color-mid-blue);
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"].error {
-  outline: 2px solid #d9534f;
 }
 
 input.error {
