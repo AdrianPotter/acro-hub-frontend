@@ -23,6 +23,7 @@
                   <th scope="col">Status</th>
                   <th scope="col">Groups</th>
                   <th scope="col">Created</th>
+                  <th scope="col">Last Login</th>
                   <th scope="col" class="col-actions">Actions</th>
                 </tr>
               </thead>
@@ -44,6 +45,7 @@
                     <span v-else class="no-groups">—</span>
                   </td>
                   <td class="cell-created">{{ formatDate(user.createdAt) }}</td>
+                  <td class="cell-last-login">{{ formatDateTime(user.lastLogin) }}</td>
                   <td class="cell-actions">
                     <div class="action-row">
                       <button
@@ -187,7 +189,19 @@ function formatDate(dateStr) {
       year: 'numeric', month: 'short', day: 'numeric',
     })
   } catch {
-    return dateStr
+    return '—'
+  }
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return '—'
+  try {
+    return new Date(dateStr).toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
+  } catch {
+    return '—'
   }
 }
 
@@ -461,6 +475,12 @@ async function saveGroups() {
 }
 
 .cell-created {
+  white-space: nowrap;
+  color: #555;
+  font-size: 0.88rem;
+}
+
+.cell-last-login {
   white-space: nowrap;
   color: #555;
   font-size: 0.88rem;
