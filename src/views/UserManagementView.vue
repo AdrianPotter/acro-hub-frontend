@@ -189,7 +189,7 @@ function formatDate(dateStr) {
       year: 'numeric', month: 'short', day: 'numeric',
     })
   } catch {
-    return dateStr
+    return '—'
   }
 }
 
@@ -201,7 +201,7 @@ function formatDateTime(dateStr) {
       hour: '2-digit', minute: '2-digit',
     })
   } catch {
-    return dateStr
+    return '—'
   }
 }
 
