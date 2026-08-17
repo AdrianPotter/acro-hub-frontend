@@ -4,10 +4,10 @@
       <div class="auth-logo" aria-hidden="true">
         <img src="../assets/main_logo.png" alt="Acro Hub Logo" />
       </div>
-      <h1>Welcome Back</h1>
-      <p class="auth-subtitle">Login to your Acro Hub account</p>
+      <h1>Set New Password</h1>
+      <p class="auth-subtitle">Enter the code from your email and choose a new password</p>
 
-      <form class="auth-form" @submit.prevent="handleLogin" novalidate>
+      <form class="auth-form" @submit.prevent="handleSubmit" novalidate>
         <div class="form-group">
           <label for="email">Email address</label>
           <input
@@ -23,65 +23,64 @@
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="code">Verification code</label>
+          <input
+            id="code"
+            v-model="code"
+            type="text"
+            placeholder="Enter your 6-digit code"
+            autocomplete="one-time-code"
+            inputmode="numeric"
+            required
+            :class="{ error: errors.code }"
+          />
+          <span v-if="errors.code" class="field-error">{{ errors.code }}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="password">New password</label>
           <input
             id="password"
             v-model="password"
             type="password"
-            placeholder="Your password"
-            autocomplete="current-password"
+            placeholder="At least 8 characters"
+            autocomplete="new-password"
             required
             :class="{ error: errors.password }"
           />
           <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
         </div>
 
-        <div class="form-group remember-me">
-          <label class="remember-me-label">
-            <input
-              id="remember-me"
-              v-model="rememberMe"
-              type="checkbox"
-            />
-            Remember me
-          </label>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm new password</label>
+          <input
+            id="confirmPassword"
+            v-model="confirmPassword"
+            type="password"
+            placeholder="Repeat your new password"
+            autocomplete="new-password"
+            required
+            :class="{ error: errors.confirmPassword }"
+          />
+          <span v-if="errors.confirmPassword" class="field-error">{{ errors.confirmPassword }}</span>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input
-              id="terms"
-              v-model="agreedToTerms"
-              type="checkbox"
-              :class="{ error: errors.terms }"
-            />
-            <span>
-              I agree to the
-              <RouterLink to="/terms">Terms &amp; Conditions</RouterLink>
-            </span>
-          </label>
-          <span v-if="errors.terms" class="field-error">{{ errors.terms }}</span>
-        </div>
+        <div v-if="formError" class="form-alert" role="alert">{{ formError }}</div>
+        <div v-if="successMessage" class="form-success" role="status">{{ successMessage }}</div>
 
-        <div v-if="formError" class="form-alert" role="alert">
-          {{ formError }}
-          <span v-if="unconfirmedEmail">
-            <RouterLink :to="{ name: 'confirm-registration', query: { email: unconfirmedEmail } }">Confirm your account</RouterLink>.
-          </span>
-        </div>
-
-        <button type="submit" class="btn-submit" :disabled="loading">
-          <span v-if="loading">Logging in…</span>
-          <span v-else>Login</span>
+        <button type="submit" class="btn-submit" :disabled="loading || !!successMessage">
+          <span v-if="loading">Resetting…</span>
+          <span v-else>Reset Password</span>
         </button>
       </form>
 
       <p class="auth-footer-text">
-        Don't have an account?
-        <RouterLink to="/register">Register here</RouterLink>
+        Didn't receive a code?
+        <RouterLink to="/forgot-password">Request one here</RouterLink>
       </p>
       <p class="auth-footer-text">
-        <RouterLink to="/forgot-password">Forgot your password?</RouterLink>
+        Remember your password?
+        <RouterLink to="/login">Login here</RouterLink>
       </p>
     </div>
   </div>
@@ -91,26 +90,26 @@
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { auth } from '../services/api.js'
-import { useAuth } from '../composables/useAuth.js'
 
 const router = useRouter()
 const route = useRoute()
-const { setAuth } = useAuth()
 
-const email = ref('')
+const email = ref(route.query.email || '')
+const code = ref('')
 const password = ref('')
-const rememberMe = ref(false)
-const agreedToTerms = ref(false)
+const confirmPassword = ref('')
 const loading = ref(false)
-const formError = ref(route.query.sessionExpired ? 'Your session has expired, please log in again.' : '')
-const unconfirmedEmail = ref('')
-const errors = reactive({ email: '', password: '', terms: '' })
+const formError = ref('')
+const successMessage = ref('')
+const errors = reactive({ email: '', code: '', password: '', confirmPassword: '' })
 
 function validate() {
   errors.email = ''
+  errors.code = ''
   errors.password = ''
-  errors.terms = ''
+  errors.confirmPassword = ''
   let valid = true
+
   if (!email.value) {
     errors.email = 'Email is required.'
     valid = false
@@ -118,36 +117,46 @@ function validate() {
     errors.email = 'Please enter a valid email address.'
     valid = false
   }
+
+  if (!code.value) {
+    errors.code = 'Verification code is required.'
+    valid = false
+  }
+
   if (!password.value) {
     errors.password = 'Password is required.'
     valid = false
-  }
-  if (!agreedToTerms.value) {
-    errors.terms = 'You must agree to the Terms & Conditions.'
+  } else if (password.value.length < 8) {
+    errors.password = 'Password must be at least 8 characters.'
     valid = false
   }
+
+  if (!confirmPassword.value) {
+    errors.confirmPassword = 'Please confirm your password.'
+    valid = false
+  } else if (password.value !== confirmPassword.value) {
+    errors.confirmPassword = 'Passwords do not match.'
+    valid = false
+  }
+
   return valid
 }
 
-async function handleLogin() {
+async function handleSubmit() {
   formError.value = ''
-  unconfirmedEmail.value = ''
+  successMessage.value = ''
   if (!validate()) return
   loading.value = true
   try {
-    const data = await auth.login(email.value, password.value)
-    setAuth({ idToken: data.idToken, accessToken: data.accessToken, refreshToken: data.refreshToken }, null, rememberMe.value)
-    const redirect = route.query.redirect || '/moves'
-    router.push(redirect)
+    await auth.confirmPassword(email.value, code.value, password.value)
+    successMessage.value = 'Password reset successfully! Redirecting to login…'
+    setTimeout(() => router.push({ name: 'login', query: { email: email.value } }), 2000)
   } catch (err) {
-    if (err.status === 403) {
-      formError.value = 'Account not yet confirmed. Please check your email or '
-      unconfirmedEmail.value = email.value
-    } else {
-      formError.value = err.status === 401
-        ? 'Invalid email or password.'
-        : (err.message || 'Login failed. Please try again.')
-    }
+    formError.value = err.status === 400
+      ? 'Invalid or expired verification code. Please request a new one.'
+      : err.status === 404
+        ? 'No account found with that email address.'
+        : (err.message || 'Password reset failed. Please try again.')
   } finally {
     loading.value = false
   }
@@ -226,39 +235,21 @@ input.error {
   color: #d9534f;
 }
 
-.checkbox-group {
-  gap: 0.25rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  font-weight: 400 !important;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.checkbox-label input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  accent-color: var(--color-mid-blue);
-  cursor: pointer;
-}
-
-.checkbox-label input[type='checkbox'].error {
-  outline: 2px solid #d9534f;
-}
-
 .form-alert {
   background-color: #fff0f0;
   border: 1px solid #f5c6cb;
   border-radius: 6px;
   padding: 0.6em 0.9em;
   color: #721c24;
+  font-size: 0.9rem;
+}
+
+.form-success {
+  background-color: #f0fff4;
+  border: 1px solid #b2dfdb;
+  border-radius: 6px;
+  padding: 0.6em 0.9em;
+  color: #155724;
   font-size: 0.9rem;
 }
 
@@ -282,28 +273,6 @@ input.error {
 .btn-submit:disabled {
   opacity: 0.65;
   cursor: not-allowed;
-}
-
-.remember-me {
-  flex-direction: row;
-  align-items: center;
-}
-
-.remember-me-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: #555;
-  cursor: pointer;
-}
-
-.remember-me-label input[type='checkbox'] {
-  width: 1rem;
-  height: 1rem;
-  cursor: pointer;
-  accent-color: var(--color-light-blue);
 }
 
 .auth-footer-text {

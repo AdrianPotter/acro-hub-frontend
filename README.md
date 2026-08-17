@@ -17,6 +17,8 @@ This SPA connects to the [Acro Hub Backend](https://github.com/AdrianPotter/acro
 | `POST` | `/auth/login` | No | Authenticate; returns `{ accessToken, idToken, refreshToken, … }` |
 | `POST` | `/auth/logout` | accessToken | Globally revoke all Cognito tokens |
 | `POST` | `/auth/register` | No | Create a new account; returns `{ message, userSub, confirmed }` |
+| `POST` | `/auth/forgot-password` | No | Initiate Cognito password reset; sends a verification code to the user's email |
+| `POST` | `/auth/confirm-password` | No | Complete password reset using email, verification code, and new password |
 | `GET` | `/moves` | idToken (Bearer) | Return all moves as `{ moves: Move[], count: N }` |
 | `GET` | `/users` | idToken — admins only | List all Cognito users with groups and metadata |
 | `GET` | `/users/{username}` | idToken — admins only | Get a single user's details and group memberships |
@@ -57,6 +59,9 @@ VITE_API_BASE_URL=https://api.acrohub.org
 | `/about` | About page describing the project |
 | `/login` | Login form (email + password) |
 | `/register` | Registration form (email, password, confirm password, T&C checkbox) |
+| `/confirm-registration` | Account confirmation form (email + verification code) |
+| `/forgot-password` | Request a password reset code by email |
+| `/reset-password` | Complete password reset with email, verification code, and new password |
 | `/moves` | Searchable list of acrobatics moves |
 | `/admin/users` | Admin-only user management: list users, edit groups, disable/enable, delete |
 

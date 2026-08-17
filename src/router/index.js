@@ -6,6 +6,8 @@ import TermsView from '../views/TermsView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import ConfirmRegistrationView from '../views/ConfirmRegistrationView.vue'
+import ForgotPasswordView from '../views/ForgotPasswordView.vue'
+import ResetPasswordView from '../views/ResetPasswordView.vue'
 import MovesView from '../views/MovesView.vue'
 import UploadMoveView from '../views/UploadMoveView.vue'
 import MoveDetailView from '../views/MoveDetailView.vue'
@@ -21,6 +23,8 @@ const routes = [
   { path: '/login', name: 'login', component: LoginView },
   { path: '/register', name: 'register', component: RegisterView },
   { path: '/confirm-registration', name: 'confirm-registration', component: ConfirmRegistrationView },
+  { path: '/forgot-password', name: 'forgot-password', component: ForgotPasswordView },
+  { path: '/reset-password', name: 'reset-password', component: ResetPasswordView },
   { path: '/moves', name: 'moves', component: MovesView, meta: { requiresAuth: true } },
   { path: '/moves/upload', name: 'upload-move', component: UploadMoveView, meta: { requiresAuth: true, requiresCanUpload: true } },
   { path: '/moves/:moveId/edit', name: 'edit-move', component: EditMoveView, meta: { requiresAuth: true, requiresCanEdit: true } },
