@@ -125,7 +125,7 @@ resource "aws_cloudfront_distribution" "website" {
     minimum_protocol_version       = "TLSv1.2_2021"
   }
 
-  aliases = var.domain_name != "" ? [var.domain_name] : []
+  aliases = var.domain_name != "" ? [var.domain_name, "www.${var.domain_name}"] : []
 
   tags = {
     Name        = "Acro Hub Frontend"
@@ -162,9 +162,10 @@ resource "aws_s3_bucket_policy" "website" {
 resource "aws_acm_certificate" "cert" {
   count = var.domain_name != "" ? 1 : 0
 
-  provider          = aws.us_east_1
-  domain_name       = var.domain_name
-  validation_method = "DNS"
+  provider                  = aws.us_east_1
+  domain_name               = var.domain_name
+  subject_alternative_names = ["www.${var.domain_name}"]
+  validation_method         = "DNS"
 
   lifecycle {
     create_before_destroy = true
@@ -254,6 +255,21 @@ resource "aws_route53_record" "website" {
 
   zone_id = var.route53_zone_id
   name    = var.domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.website.domain_name
+    zone_id                = aws_cloudfront_distribution.website.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route53 A record for www subdomain
+resource "aws_route53_record" "website_www" {
+  count = var.domain_name != "" ? 1 : 0
+
+  zone_id = var.route53_zone_id
+  name    = "www.${var.domain_name}"
   type    = "A"
 
   alias {
