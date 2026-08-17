@@ -102,10 +102,10 @@ export const auth = {
       body: JSON.stringify({ email }),
     }),
 
-  confirmPassword: (email, code, password) =>
+  confirmPassword: (email, code, newPassword) =>
     request('/auth/confirm-password', {
       method: 'POST',
-      body: JSON.stringify({ email, code, newPassword: password }),
+      body: JSON.stringify({ email, code, newPassword }),
     }),
 }
 
