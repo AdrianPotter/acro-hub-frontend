@@ -95,6 +95,18 @@ export const auth = {
       method: 'POST',
       body: JSON.stringify({ refreshToken }),
     }),
+
+  forgotPassword: (email) =>
+    request('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+
+  confirmPassword: (email, code, password) =>
+    request('/auth/confirm-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, code, password }),
+    }),
 }
 
 export const movesApi = {
