@@ -152,11 +152,9 @@ async function handleSubmit() {
     successMessage.value = 'Password reset successfully! Redirecting to login…'
     setTimeout(() => router.push({ name: 'login', query: { email: email.value } }), 2000)
   } catch (err) {
-    formError.value = err.status === 400
-      ? 'Invalid or expired verification code. Please request a new one.'
-      : err.status === 404
-        ? 'No account found with that email address.'
-        : (err.message || 'Password reset failed. Please try again.')
+    formError.value = err.status === 404
+      ? 'No account found with that email address.'
+      : (err.message || 'Password reset failed. Please try again.')
   } finally {
     loading.value = false
   }
