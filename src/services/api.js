@@ -136,8 +136,9 @@ export const videosApi = {
     }),
   getViewUrl: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/url`),
+  // POST is used as the backend only exposes POST on /videos/{id}/view
   getViewCount: (moveId) =>
-    request(`/videos/${encodeURIComponent(moveId)}/view`),
+    request(`/videos/${encodeURIComponent(moveId)}/view`, { method: 'POST' }),
   recordView: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/view`, { method: 'POST' }),
 }
