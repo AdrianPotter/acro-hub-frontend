@@ -26,6 +26,15 @@
             Difficulty
             <span class="sort-arrow" aria-hidden="true">{{ sortBy === 'difficulty' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
           </button>
+          <button
+            class="sort-btn"
+            :class="{ active: sortBy === 'views' }"
+            @click="toggleSort('views')"
+            :aria-pressed="sortBy === 'views'"
+          >
+            Views
+            <span class="sort-arrow" aria-hidden="true">{{ sortBy === 'views' ? (sortDir === 'asc' ? '↑' : '↓') : '' }}</span>
+          </button>
         </div>
         <div class="moves-header-actions">
           <div class="search-wrapper">
@@ -80,6 +89,9 @@
               <RouterLink :to="`/moves/${move.moveId}`" class="move-card">
                 <div class="move-badges">
                   <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
+                  <span v-if="move.viewCount !== undefined" class="view-count">
+                    👁 {{ move.viewCount.toLocaleString() }}
+                  </span>
                 </div>
                 <h2 class="move-name">{{ move.name }}</h2>
                 <p class="move-desc">{{ move.description }}</p>
@@ -133,7 +145,7 @@ function toggleSort(field) {
     sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
   } else {
     sortBy.value = field
-    sortDir.value = 'asc'
+    sortDir.value = field === 'views' ? 'desc' : 'asc'
   }
 }
 
@@ -210,6 +222,15 @@ const filteredMoves = computed(() => {
       const diff = aRank - bRank
       if (diff !== 0) return sortDir.value === 'asc' ? diff : -diff
       // Within same difficulty, sort alphabetically (respecting direction)
+      const cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      return sortDir.value === 'asc' ? cmp : -cmp
+    }
+    if (sortBy.value === 'views') {
+      const aViews = a.viewCount ?? 0
+      const bViews = b.viewCount ?? 0
+      const diff = aViews - bViews
+      if (diff !== 0) return sortDir.value === 'asc' ? diff : -diff
+      // tiebreak alphabetically
       const cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase())
       return sortDir.value === 'asc' ? cmp : -cmp
     }
@@ -579,5 +600,12 @@ const filteredMoves = computed(() => {
   color: #777;
   font-size: 0.85rem;
   margin: 0;
+}
+
+.view-count {
+  font-size: 0.78rem;
+  color: #666;
+  margin-left: auto;
+  white-space: nowrap;
 }
 </style>
