@@ -136,6 +136,8 @@ export const videosApi = {
     }),
   getViewUrl: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/url`),
+  getViewCount: (moveId) =>
+    request(`/videos/${encodeURIComponent(moveId)}/view`),
   recordView: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/view`, { method: 'POST' }),
 }
