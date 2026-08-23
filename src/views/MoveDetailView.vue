@@ -7,6 +7,9 @@
           <div class="move-badges">
             <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
           </div>
+          <div v-if="move.viewCount !== undefined" class="move-view-count">
+            👁 {{ move.viewCount.toLocaleString() }} {{ move.viewCount === 1 ? 'view' : 'views' }}
+          </div>
           <div class="header-title-row">
             <h1>{{ move.name }}</h1>
             <RouterLink v-if="canEdit" :to="`/moves/${moveId}/edit`" class="btn-edit-move">Edit Move</RouterLink>
@@ -31,6 +34,7 @@
               controls
               preload="metadata"
               aria-label="Video for {{ move.name }}"
+              @play="onVideoPlay"
             >
               Your browser does not support the video tag.
             </video>
@@ -53,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { movesApi, videosApi } from '../services/api.js'
 import { useAuth } from '../composables/useAuth.js'
@@ -61,7 +65,7 @@ import { useAuth } from '../composables/useAuth.js'
 const route = useRoute()
 const moveId = route.params.moveId
 
-const { canEdit } = useAuth()
+const { canEdit, isLoggedIn } = useAuth()
 
 const move = ref(null)
 const loading = ref(true)
@@ -70,6 +74,26 @@ const fetchError = ref('')
 const videoUrl = ref('')
 const videoLoading = ref(true)
 const videoError = ref('')
+
+// View count tracking
+const hasPlayed = ref(false)
+const hasStayed = ref(false)
+const viewRecorded = ref(false)
+let stayTimer = null
+
+function maybeRecordView() {
+  if (hasPlayed.value && hasStayed.value && !viewRecorded.value && isLoggedIn.value) {
+    viewRecorded.value = true
+    videosApi.recordView(moveId).catch(() => {
+      // fire-and-forget — silently ignore errors
+    })
+  }
+}
+
+function onVideoPlay() {
+  hasPlayed.value = true
+  maybeRecordView()
+}
 
 onMounted(async () => {
   const [moveResult, videoResult] = await Promise.allSettled([
@@ -93,6 +117,17 @@ onMounted(async () => {
     videoError.value = videoResult.reason?.message || 'Failed to load video.'
   }
   videoLoading.value = false
+
+  if (isLoggedIn.value) {
+    stayTimer = setTimeout(() => {
+      hasStayed.value = true
+      maybeRecordView()
+    }, 3000)
+  }
+})
+
+onUnmounted(() => {
+  if (stayTimer) clearTimeout(stayTimer)
 })
 </script>
 
@@ -160,6 +195,11 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+.move-view-count {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .move-badge {
