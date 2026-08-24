@@ -32,8 +32,11 @@ async function tryRefreshTokens() {
 
 async function request(path, options = {}, skipRefresh = false) {
   const idToken = localStorage.getItem('idToken')
+  // Only include Content-Type when the request has a body; sending it on GET/DELETE
+  // requests causes browsers to send a CORS preflight that can fail on simple endpoints.
+  const hasBody = options.body !== undefined && options.body !== null
   const headers = {
-    'Content-Type': 'application/json',
+    ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
     ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
     ...options.headers,
   }
@@ -136,9 +139,10 @@ export const videosApi = {
     }),
   getViewUrl: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/url`),
-  // POST is used as the backend only exposes POST on /videos/{id}/view
+  // GET retrieves the current view count without side-effects or preflight
   getViewCount: (moveId) =>
-    request(`/videos/${encodeURIComponent(moveId)}/view`, { method: 'POST' }),
+    request(`/videos/${encodeURIComponent(moveId)}/view`),
+  // POST records a view event; only called after the user has actually watched
   recordView: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/view`, { method: 'POST' }),
 }

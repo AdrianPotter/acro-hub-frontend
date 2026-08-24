@@ -112,7 +112,7 @@
 
 <script setup>
 import { ref, computed, reactive, onMounted, watch } from 'vue'
-import { movesApi, videosApi } from '../services/api.js'
+import { movesApi } from '../services/api.js'
 import { useAuth } from '../composables/useAuth.js'
 
 const { canUpload } = useAuth()
@@ -181,14 +181,6 @@ onMounted(async () => {
   try {
     const data = await movesApi.list()
     moves.value = data.moves ?? data
-    const viewCountResults = await Promise.allSettled(
-      moves.value.map(move => videosApi.getViewCount(move.moveId))
-    )
-    viewCountResults.forEach((result, i) => {
-      if (result.status === 'fulfilled' && result.value?.viewCount !== undefined) {
-        moves.value[i] = { ...moves.value[i], viewCount: result.value.viewCount }
-      }
-    })
   } catch (err) {
     fetchError.value = err.message || 'Failed to load moves. Please try again.'
   } finally {
