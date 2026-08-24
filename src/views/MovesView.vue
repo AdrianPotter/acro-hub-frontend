@@ -181,20 +181,38 @@ onMounted(async () => {
   try {
     const data = await movesApi.list()
     const loadedMoves = data.moves ?? data
-    const countResults = await Promise.allSettled(
-      loadedMoves.map((move) => videosApi.getViewCount(move.moveId))
-    )
+    const viewCountValues = new Array(loadedMoves.length).fill(undefined)
+    const maxConcurrentRequests = 5
+    let nextIndex = 0
 
-    moves.value = loadedMoves.map((move, index) => {
-      const result = countResults[index]
-      if (result?.status === 'fulfilled') {
-        const value = typeof result.value === 'number' ? result.value : result.value?.viewCount
-        if (typeof value === 'number') {
-          return { ...move, viewCount: value }
+    const worker = async () => {
+      while (nextIndex < loadedMoves.length) {
+        const index = nextIndex++
+
+        try {
+          const result = await videosApi.getViewCount(loadedMoves[index].moveId)
+          const value = typeof result === 'number' ? result : result?.viewCount
+          if (typeof value === 'number') {
+            viewCountValues[index] = value
+          }
+        } catch {
+          // ignore per-move count failures so the list still renders
         }
       }
-      return move
-    })
+    }
+
+    await Promise.all(
+      Array.from(
+        { length: Math.min(maxConcurrentRequests, loadedMoves.length) },
+        () => worker()
+      )
+    )
+
+    moves.value = loadedMoves.map((move, index) =>
+      typeof viewCountValues[index] === 'number'
+        ? { ...move, viewCount: viewCountValues[index] }
+        : move
+    )
   } catch (err) {
     fetchError.value = err.message || 'Failed to load moves. Please try again.'
   } finally {

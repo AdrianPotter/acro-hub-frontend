@@ -38,7 +38,7 @@ async function request(path, options = {}, skipRefresh = false) {
   const hasBody = fetchOptions.body !== undefined && fetchOptions.body !== null
   const headers = {
     ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
-    ...(includeAuth && idToken ? { Authorization: `****** } : {}),
+    ...(includeAuth && idToken ? { Authorization: 'Bearer ' + idToken } : {}),
     ...fetchOptions.headers,
   }
 
