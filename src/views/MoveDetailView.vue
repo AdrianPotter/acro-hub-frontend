@@ -96,17 +96,13 @@ function onVideoPlay() {
 }
 
 onMounted(async () => {
-  const [moveResult, videoResult, viewCountResult] = await Promise.allSettled([
+  const [moveResult, videoResult] = await Promise.allSettled([
     movesApi.get(moveId),
     videosApi.getViewUrl(moveId),
-    videosApi.getViewCount(moveId),
   ])
 
   if (moveResult.status === 'fulfilled') {
     move.value = moveResult.value
-    if (viewCountResult.status === 'fulfilled' && viewCountResult.value?.viewCount !== undefined) {
-      move.value = { ...move.value, viewCount: viewCountResult.value.viewCount }
-    }
   } else {
     fetchError.value = moveResult.reason?.message || 'Failed to load move details.'
   }
