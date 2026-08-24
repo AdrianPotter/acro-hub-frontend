@@ -139,9 +139,6 @@ export const videosApi = {
     }),
   getViewUrl: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/url`),
-  // GET retrieves the current view count without side-effects or preflight
-  getViewCount: (moveId) =>
-    request(`/videos/${encodeURIComponent(moveId)}/view`),
   // POST records a view event; only called after the user has actually watched
   recordView: (moveId) =>
     request(`/videos/${encodeURIComponent(moveId)}/view`, { method: 'POST' }),
