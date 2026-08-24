@@ -7,8 +7,8 @@
           <div class="move-badges">
             <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
           </div>
-          <div v-if="move.viewCount !== undefined" class="move-view-count">
-            👁 {{ move.viewCount.toLocaleString() }} {{ move.viewCount === 1 ? 'view' : 'views' }}
+          <div class="move-view-count">
+            👁 {{ (move.viewCount ?? 0).toLocaleString() }} {{ (move.viewCount ?? 0) === 1 ? 'view' : 'views' }}
           </div>
           <div class="header-title-row">
             <h1>{{ move.name }}</h1>

@@ -89,8 +89,8 @@
               <RouterLink :to="`/moves/${move.moveId}`" class="move-card">
                 <div class="move-badges">
                   <div class="move-badge difficulty" :class="move.difficulty">{{ move.difficulty }}</div>
-                  <span v-if="move.viewCount !== undefined" class="view-count">
-                    👁 {{ move.viewCount.toLocaleString() }}
+                  <span class="view-count">
+                    👁 {{ (move.viewCount ?? 0).toLocaleString() }}
                   </span>
                 </div>
                 <h2 class="move-name">{{ move.name }}</h2>
